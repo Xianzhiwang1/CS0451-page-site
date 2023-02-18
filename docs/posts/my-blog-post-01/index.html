@@ -6,11 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Phil Chodrow">
-<meta name="dcterms.date" content="2023-01-10">
-<meta name="description" content="An example blog post illustrating the key techniques you’ll need to demonstrate your learning in CSCI 0451.">
+<meta name="author" content="Xianzhi Wang">
+<meta name="dcterms.date" content="2023-02-15">
+<meta name="description" content="First blog post on Perceptron">
 
-<title>My Awesome CSCI 0451 Blog - Hello Blog</title>
+<title>My Awesome CSCI 0451 Blog - My first Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -176,10 +176,10 @@ background-size: cover;
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Hello Blog</h1>
+      <h1 class="title">My first Blog</h1>
                   <div>
         <div class="description">
-          An example blog post illustrating the key techniques you’ll need to demonstrate your learning in CSCI 0451.
+          First blog post on Perceptron
         </div>
       </div>
                 </div>
@@ -191,14 +191,14 @@ background-size: cover;
       <div>
       <div class="quarto-title-meta-heading">Author</div>
       <div class="quarto-title-meta-contents">
-               <p>Phil Chodrow </p>
+               <p>Xianzhi Wang </p>
             </div>
     </div>
       
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">January 10, 2023</p>
+        <p class="date">February 15, 2023</p>
       </div>
     </div>
       
@@ -232,14 +232,14 @@ format: html
 <section id="running-python-code" class="level1">
 <h1>Running Python Code</h1>
 <p>To run Python code, place your code in a Python code block inside your notebook. You can run the code block inside VSCode (or JupyterLab) using the keyboard shortcut <code>ctrl + Enter</code>. You’ll see the result of your computation below the code, including the value of the most recent statement.</p>
-<div class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">"CSCI"</span> <span class="op">+</span> <span class="st">" 0451"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>'CSCI 0451'</code></pre>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"you can learn this!"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>you can learn this!</code></pre>
 </div>
 </div>
 <p>We’ll have lots of opportunities to make data visualizations in this course. These also display inside the notebook, and get converted into your blog post:</p>
-<div class="cell" data-execution_count="1">
+<div class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
@@ -247,13 +247,28 @@ format: html
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_blobs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">12345</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>n<span class="op">=</span><span class="dv">100</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>p_features <span class="op">=</span> <span class="dv">3</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> make_blobs(n_samples <span class="op">=</span> <span class="dv">100</span>, n_features<span class="op">=</span>p_features<span class="op">-</span><span class="dv">1</span>, centers<span class="op">=</span>[ (<span class="op">-</span><span class="fl">1.7</span>,<span class="op">-</span><span class="fl">1.7</span>), (<span class="fl">1.7</span>,<span class="fl">1.7</span>) ])</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>fig<span class="op">=</span>plt.scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>], c<span class="op">=</span>y)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>xlab<span class="op">=</span>plt.xlabel(<span class="st">"feature 1"</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>ylab<span class="op">=</span>plt.ylabel(<span class="st">"feature 2"</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
+</div>
+</div>
 <p>Another thing we’ll often do is implement an algorithm in a source file (i.e.&nbsp;a <code>.py</code> file) and then <em>use</em> it in a notebook. To do this, just place the <code>.py</code> file in the same directory as the notebook. For example, the file <code>source.py</code> in the same directory contains a custom function (which prints a message). I can use like this:</p>
 <div class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> perceptron <span class="im">import</span> Perceptron</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> Perceptron(w, history)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>p.myprint()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> perceptron <span class="im">import</span> Perceptron</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> Perceptron(w, history)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>p.myprint()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>it's running around!</code></pre>
 </div>
