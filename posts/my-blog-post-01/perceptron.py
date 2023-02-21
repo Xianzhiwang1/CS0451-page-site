@@ -37,6 +37,7 @@ class Perceptron:
             dotproduct = y_i *np.dot(w_,x_i)
             w_next = w_ + (dotproduct<0) * y_i * x_i
             
+            
             # update before next loop
             w_ = w_next
             index += 1 
