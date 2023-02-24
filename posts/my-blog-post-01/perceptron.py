@@ -20,7 +20,7 @@ class Perceptron:
         mu, nu = X.shape
         W = np.random.randn(mu,nu)
         w = W[1,:]
-        b = 10
+        b = 100
         index = 0
 
         # create X tilde, w tilde, y tilde
@@ -29,27 +29,37 @@ class Perceptron:
         y_ = 2 * y-1
 
         # while loop
-        while (index <= maxiter) and (self.accuracy(X = X_ ,y = y_ ,w = w_ ) < 1):
+        while (index <= maxiter) :#and (self.accuracy(X = X_ ,y = y_ ,w = w_ ) < 1):
 
             # pick a random index i \in [n]
-            w_shape = np.shape(w)[0]
-            i = np.random.randint(w_shape+1)
-            x_i = X_[i,:]
-            y_i = y_[i]
+            w_shape = np.shape(X_)[0]
+            # i = np.random.randint(w_shape+1)
+            for i in range(w_shape):
+                x_i = X_[i,:]
+                y_i = y_[i]
+                # compute 
+                dotproduct = y_i *np.dot(w_,x_i)
+                w_next = w_ + (dotproduct<0) * y_i * x_i
 
-            
-            # compute 
-            dotproduct = y_i *np.dot(w_,x_i)
-            w_next = w_ + (dotproduct<0) * y_i * x_i
+                # append accuracy score to history
+                accuracy = self.accuracy(X=X_, y=y_, w=w_)
+                self.history.append(accuracy)
 
-            # append accuracy score to history
-            accuracy = self.accuracy(X=X_, y=y_, w=w_)
-            self.history.append(accuracy)
+                # update before next loop
+                w_ = w_next
+                index += 1 
+
+            # # compute 
+            # dotproduct = y_i *np.dot(w_,x_i)
+            # w_next = w_ + (dotproduct<0) * y_i * x_i
+
+            # # append accuracy score to history
+            # accuracy = self.accuracy(X=X_, y=y_, w=w_)
+            # self.history.append(accuracy)
             
-            
-            # update before next loop
-            w_ = w_next
-            index += 1 
+            # # update before next loop
+            # w_ = w_next
+            # index += 1 
         self.w_ = w_
         # append accuracy score one last time
         accuracy = self.accuracy(X=X_, y=y_, w=w_)
