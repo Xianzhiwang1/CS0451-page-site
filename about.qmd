@@ -1,6 +1,6 @@
 ---
 title: "About"
-image: profile.jpg
+image: cool-profile.jpg
 about:
   template: jolla
   links:
@@ -15,4 +15,4 @@ about:
       href: https://github.com/Xianzhiwang1 
 
 ---
-This is Xianzhi Wang's Blog for CS0451 Machine Learning class.
+This is Xianzhi Wang's Flabbergasted Blog for CS0451 Machine Learning class.
