@@ -32,9 +32,9 @@ class Perceptron:
         while (index <= maxiter) :#and (self.accuracy(X = X_ ,y = y_ ,w = w_ ) < 1):
 
             # pick a random index i \in [n]
-            w_shape = np.shape(X_)[0]
+            ndim = np.shape(X_)[0]
             # i = np.random.randint(w_shape+1)
-            for i in range(w_shape):
+            for i in range(ndim):
                 x_i = X_[i,:]
                 y_i = y_[i]
                 # compute 
