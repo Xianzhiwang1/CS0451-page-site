@@ -81,8 +81,10 @@ class Perceptron:
         
 
     def score(self, X, y) -> float:
-        X_ = np.append(X, np.ones((X.shape[0],1)),1)
-        return ( (X_ @ self.w_) * y >0).mean()
+        return (self.predict(X) == y).mean()
+        
+        # X_ = np.append(X, np.ones((X.shape[0],1)),1)
+        # return 2*( (X_ @ self.w_) * y >0).mean()
 
     def myprint(self):
         print("it's working!")
