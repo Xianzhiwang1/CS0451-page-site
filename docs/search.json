@@ -2,7 +2,7 @@
   {
     "objectID": "posts/my-blog-post-01/index.html",
     "href": "posts/my-blog-post-01/index.html",
-    "title": "My first Blog",
+    "title": "My first Blog post on Perceptron",
     "section": "",
     "text": "Under Construction.\n\n\nImplementation\n\n\nUnder Construction.\n\n%load_ext autoreload\n%autoreload 2\n\nThe autoreload extension is already loaded. To reload it, use:\n  %reload_ext autoreload\n\n\nFirst, let’s import some libraries.\n\nimport numpy as np\nimport pandas as pd\nimport seaborn as sns\nfrom matplotlib import pyplot as plt\n\nfrom sklearn.datasets import make_blobs\n\n\nnp.random.seed(12345)\nn=100\np_features = 3\n\nX, y = make_blobs(n_samples = 100, n_features=p_features-1, centers=[ (-1.7,-1.7, -1.7), (1.7,1.7, 1.7) ])\n\n# fig=plt.scatter(X[:,0], X[:,1], c=y)\n# xlab=plt.xlabel(\"feature 1\")\n# ylab=plt.ylabel(\"feature 2\")\n\n\nWe would like to apply the perceptron algorithm to find the hyperplane that separates those data points, given that they are separable (so perceptron algorithm will converge). A key equation in the perceptron algorithm that defines the update is the following:\n\n\\[ \\tilde{w}^{(t+1)} = \\tilde{w}^{t} + \\mathbb{1} (\\tilde{y}_i \\langle \\tilde{w}^{(t)}, \\tilde{x}_i \\rangle < 0)\\tilde{y}_i\\tilde{x}_i.\\]\n\nfrom perceptron import Perceptron\n\np = Perceptron()\np.fit(X, y, maxiter=10000)\n\nprint(p.history[-10:])\nprint(p.w_)\n# print(X)\n\n# print(w)\n\n[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]\n[ 50.44366343  39.1028252   21.79442178 -40.        ]\n\n\n\nfig = plt.plot(p.history)\nxlab = plt.xlabel(\"Iteration\")\nylab = plt.ylabel(\"Accuracy\")\n\n\n\n\n\ndef draw_line(w, x_min, x_max):\n  x = np.linspace(x_min, x_max, 101)\n  y = -(w[0]*x + w[2])/w[1]\n  plt.plot(x, y, color = \"black\")\n\nfig = plt.scatter(X[:,0], X[:,1], c = y)\nfig = draw_line(p.w_, -2, 2)\n\nxlab = plt.xlabel(\"Feature 1\")\nylab = plt.ylabel(\"Feature 2\")\n\n\n\n\n\nprint(p.score(X,y))\n\n1.0\n\n\n\nprint((1<2)*2)\nprint((1>2)*2)\n\n2\n0\n\n\n\nprint(p.predict(X))\nprint(\"\\n\\n\")\nprint(y)\n\n[1 0 0 0 1 1 0 0 1 0 1 0 0 0 1 0 1 0 0 0 1 0 0 1 1 1 1 1 0 1 1 1 0 0 1 1 0\n 0 1 0 0 0 1 1 1 0 1 0 0 1 1 0 1 0 1 1 1 0 1 1 0 0 0 0 1 1 0 0 1 1 0 0 0 0\n 0 1 0 0 1 1 1 1 1 0 1 1 1 0 1 0 1 0 1 1 0 1 0 1 0 0]\n\n\n\n[1 0 0 0 1 1 0 0 1 0 1 0 0 0 1 0 1 0 0 0 1 0 0 1 1 1 1 1 0 1 1 1 0 0 1 1 0\n 0 1 0 0 0 1 1 1 0 1 0 0 1 1 0 1 0 1 1 1 0 1 1 0 0 0 0 1 1 0 0 1 1 0 0 0 0\n 0 1 0 0 1 1 1 1 1 0 1 1 1 0 1 0 1 0 1 1 0 1 0 1 0 0]\n\n\n\nprint(p.w_)\nprint(np.size(p.w_))\n\n[39.71808898 55.01564117 -7.        ]\n3\n\n\n\n\n\nunder construction"
   },
@@ -25,14 +25,14 @@
     "href": "posts/my-blog-post-02-gradient-descent/index.html",
     "title": "Gradient Descent",
     "section": "",
-    "text": "do the gradient descent"
+    "text": "do the gradient descent\n\n\nherLoss = LR.loss(X_, y)\nprint(herLoss)\n\n0.2021284609271599\n\n\n\nloss = logis.empirical_risk(X_, y, logis.logistic_loss, LR.w_)\nprint(loss)\n\nfig, axarr = plt.subplots(1, 2)\n\naxarr[0].scatter(X[:,0], X[:,1], c = y)\naxarr[0].set(xlabel = \"Feature 1\", ylabel = \"Feature 2\", title = f\"Loss = {loss}\")\n\nf1 = np.linspace(-3, 3, 101)\n\np = axarr[0].plot(f1, (LR.w_[2] - f1*LR.w_[0])/LR.w_[1], color = \"black\")\n\naxarr[1].plot(LR.loss_history)\naxarr[1].set(xlabel = \"Iteration number\", ylabel = \"Empirical Risk\")\nplt.tight_layout()\n\n0.2021284609271599\n\n\n\n\n\n\nmyScore = LR.score(X_,y)\nprint(myScore)\n\nfig, axarr = plt.subplots(1, 2)\n\naxarr[0].scatter(X[:,0], X[:,1], c = y)\naxarr[0].set(xlabel = \"Feature 1\", ylabel = \"Feature 2\", title = f\"Score = {myScore}\")\n\nf1 = np.linspace(-3, 3, 101)\n\np = axarr[0].plot(f1, (LR.w_[2] - f1*LR.w_[0])/LR.w_[1], color = \"black\")\n\naxarr[1].plot(LR.score_history)\n\naxarr[1].set(xlabel = \"Iteration number\", ylabel = \"Score History\")\nplt.tight_layout()\n\n0.7978715390728401"
   },
   {
     "objectID": "index.html",
     "href": "index.html",
     "title": "My Flabbergasted CSCI 0451 Blog",
     "section": "",
-    "text": "implementing gradient descent\n\n\n\n\n\n\nFeb 24, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nMy first blog post on Perceptron\n\n\n\n\n\n\nFeb 15, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nAn example blog post illustrating the key techniques you’ll need to demonstrate your learning in CSCI 0451.\n\n\n\n\n\n\nJan 10, 2023\n\n\nPhil Chodrow\n\n\n\n\n\n\nNo matching items"
+    "text": "implementing gradient descent\n\n\n\n\n\n\nFeb 24, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nMy first Blog post on Perceptron\n\n\n\n\n\n\nFeb 15, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nAn example blog post illustrating the key techniques you’ll need to demonstrate your learning in CSCI 0451.\n\n\n\n\n\n\nJan 10, 2023\n\n\nPhil Chodrow\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",

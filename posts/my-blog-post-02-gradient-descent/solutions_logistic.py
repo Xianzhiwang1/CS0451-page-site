@@ -51,21 +51,24 @@ class LogisticRegression():
 
 
 
-    def fit(self, X_: np.array, y: np.array, alpha: float, max_epochs: float) -> None:
-        # use gradient descent
-        mu, nu = X_.shape
+    def fit(self, X: np.array, y: np.array, alpha: float, max_epochs: float) -> None:
+        mu, nu = X.shape
+        X_ = self.pad(X)
         W = np.random.randn(mu,nu)
-        w = W[1,:]
+        my_w = W[1,:]
+        b = 1
+        self.w_ = np.append(my_w, -b)
+        history = []
+        i = 0
 
 
         done = False
         prev_loss = np.inf
-        history = []
 
 
-        while not done: 
-            w -= alpha * self.gradient(w, X_, y)                      # gradient step
-            new_loss = empirical_risk(X_, y, logistic_loss, w) # compute loss
+        while (not done) and (i <= max_epochs): 
+            self.w_ -= alpha * self.gradient(self.w_, X_, y)                      # gradient step
+            new_loss = empirical_risk(X_, y, logistic_loss, self.w_) # compute loss
             
             history.append(new_loss)
             # check if loss hasn't changed and terminate if so
@@ -73,22 +76,81 @@ class LogisticRegression():
                 done = True
             else:
                 prev_loss = new_loss
+            i += 1
+
+            # update score
+            self.score_history.append(self.score(X_, y))
+
+        # self.w_ = w
+        self.loss_history = history
+        
+
+
+
+
+
 
     def predict(self, X):
-        pass
+        return (X@self.w_ > 0)*1
 
-    def score(self, X):
-        pass
-
-
+    def score(self, X, y) -> float:
+        return 1 - self.loss(X,y) 
 
 
-    def loss(self, X,y):
-        pass
+    # def loss(self, X,y):
+    #     return 1-(predict(X, self.w_) == y).mean()
+    def loss(self, X, y) -> float:
+        return empirical_risk(X, y, logistic_loss, self.w_)
 
 
-    def fit_stochastic(self):
-        pass
+
+    def fit_stochastic(self, X: np.array, y: np.array, alpha: float, max_epochs: float, batch_size: int) -> None:
+        n = X.shape[0]
+        for j in np.arange(max_epochs):
+                    
+            order = np.arange(n)
+            np.random.shuffle(order)
+
+            for batch in np.array_split(order, n // batch_size + 1):
+                x_batch = X[batch,:]
+                y_batch = y[batch]
+                grad = self.gradient(self.w_, x_batch, y_batch) 
+                # perform the gradient step
+                # ...
+
+            mu, nu = X.shape
+            X_ = self.pad(X)
+            W = np.random.randn(mu,nu)
+            my_w = W[1,:]
+            b = 1
+            self.w_ = np.append(my_w, -b)
+            history = []
+            i = 0
+
+
+        done = False
+        prev_loss = np.inf
+
+
+        while (not done) and (i <= max_epochs): 
+            self.w_ -= alpha * self.gradient(self.w_, X_, y)                      # gradient step
+            new_loss = empirical_risk(X_, y, logistic_loss, self.w_) # compute loss
+            
+            history.append(new_loss)
+            # check if loss hasn't changed and terminate if so
+            if np.isclose(new_loss, prev_loss):          
+                done = True
+            else:
+                prev_loss = new_loss
+            i += 1
+
+            # update score
+            self.score_history.append(self.score(X_, y))
+
+        # self.w_ = w
+        self.loss_history = history
+
+
 
     def pad(self, X):
         return np.append(X, np.ones((X.shape[0], 1)), 1)
