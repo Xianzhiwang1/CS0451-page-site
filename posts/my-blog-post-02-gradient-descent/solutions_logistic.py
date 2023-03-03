@@ -139,7 +139,7 @@ class LogisticRegression():
                     grad = self.gradient(self.omega_, x_batch, y_batch) 
                     # perform the gradient step
                     
-                    omega_next = self.omega_ - alpha * grad + beta * (self.omega_ + self.omega_previous) 
+                    omega_next = self.omega_ - alpha * grad + beta * (self.omega_ - self.omega_previous) 
                     self.omega_previous = self.omega_
                     self.omega_ = omega_next
 
