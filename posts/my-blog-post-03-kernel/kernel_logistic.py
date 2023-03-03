@@ -18,6 +18,8 @@ class KLR:
         self.kernel = kernel
         self.kernel_kwargs = kernel_kwargs
         self.X_train = None
+        self.y = None
+        self.v = None
 
 
 
@@ -29,25 +31,37 @@ class KLR:
         return - y*np.log(self.sigmoid(y_hat)) - (1-y)*np.log(1-self.sigmoid(y_hat))
 
 
-    def matrmultiply(self, i: int, X_: np.array, v: np.array) -> np.array:
-        # x_i = X[i,:]
-        # x_col_j = X[:,j]
-        # gram_matr = rbf_kernel(X_)
-        km = self.kernel(X_, X_, **self.kernel_kwargs)
-        row_i = km[i,:]
+    # def matrmultiply(self, i: int, X_: np.array, v: np.array) -> np.array:
+    #     # x_i = X[i,:]
+    #     # x_col_j = X[:,j]
+    #     # gram_matr = rbf_kernel(X_)
+    #     km = self.kernel(X_, X_, **self.kernel_kwargs)
+    #     row_i = km[i,:]
 
-        return row_i@v
+    #     return row_i@v
 
+
+    # def empirical_risk_with_kernel(self, X: np.array, y: np.array, loss, v):
+    #     myloss = 0
+    #     ndim = np.shape(X)[0]
+    #     km = self.kernel(X, X, **self.kernel_kwargs)
+
+
+    #     for i in range(ndim):
+    #         yi = y[i]
+    #         row_i = km[i,:]
+    #         y_hat_i = row_i@v 
+    #         myloss += loss(y_hat_i, yi)
+            
+    #     return myloss /ndim
 
     def empirical_risk_with_kernel(self, X: np.array, y: np.array, loss, v):
-        myloss = 0
-        ndim = np.shape(X)[0]
-        for i in range(ndim):
-            yi = y[i]
-            y_hat_i = self.matrmultiply(i = i, X_ = X, v = v)
-            myloss += loss(y_hat_i, yi)
+        # myloss = 0
+        # ndim = np.shape(X)[0]
+        km = self.kernel(X, X, **self.kernel_kwargs)
+        y_hat = km@v
             
-        return myloss /ndim
+        return loss(y_hat, y).mean() 
 
 
     def logistic_loss_derivative(self, y_hat, y) -> float:
@@ -66,8 +80,8 @@ class KLR:
     #     return mysum / ndim 
     def find_pars(self, X, y):
         
-        p = X.shape[0]
-        w0 = np.random.rand(p) # random initial guess
+        n = X.shape[0]
+        w0 = np.random.rand(n) # random initial guess
         
         # perform the minimization
         result = minimize(lambda v: self.empirical_risk_with_kernel(X = X, y = y, loss = self.logistic_loss,  v = v), 
@@ -78,20 +92,25 @@ class KLR:
 
     
     def fit(self, X: np.array,  y: np.array) -> None:
-        mu, nu = X.shape
         X_ = self.pad(X)
-        V = np.random.randn(mu,nu)
-        my_v = V[1,:]
+        # mu, nu = X.shape
+        # V = np.ones((mu,nu))
+        # my_v = V[0,:]
+        mu = X.shape[0]
+        my_v = np.ones(mu)
         b = 1
         v = np.append(my_v, -b)
         self.v = v
+        self.y = y 
+        print(self.v)
 
         self.X_train = X_
-        km = self.kernel(X_, X_, **self.kernel_kwargs)
-        my_parameters = self.find_pars(X_, y)
-        # print(km)
-        print("OMG\nOMG\nOMG\n")
-        self.v = my_parameters
+
+        my_parameters = self.find_pars(self.X_train, self.y)
+
+        # print("OMG\nOMG\nOMG\n")
+        self.v = my_parameters 
+        print(self.v)
 
 
     def predict(self, X) -> np.array:
