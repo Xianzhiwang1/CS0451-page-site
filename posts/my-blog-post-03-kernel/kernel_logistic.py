@@ -97,30 +97,37 @@ class KLR:
         # V = np.ones((mu,nu))
         # my_v = V[0,:]
         mu = X.shape[0]
-        my_v = np.ones(mu)
-        b = 1
-        v = np.append(my_v, -b)
+        v = np.random.rand(mu) 
+        # my_v = np.ones(mu)
+        # b = 1
+        # v = np.append(my_v, -b)
         self.v = v
         self.y = y 
-        print(self.v)
+        # print(self.v)
 
         self.X_train = X_
 
         my_parameters = self.find_pars(self.X_train, self.y)
 
-        # print("OMG\nOMG\nOMG\n")
         self.v = my_parameters 
-        print(self.v)
+        # print(self.v)
 
+
+    # def predict(self, X) -> np.array:
+    #     X_ = self.pad(X) 
+    #     km = self.kernel(X_, self.X_train, **self.kernel_kwargs) # km stands for kernel matrix
+    #     innerProd = km@self.v
+    #     y_hat = 1 * (innerProd > 0)
+
+    #     return y_hat 
 
     def predict(self, X) -> np.array:
-        X_ = self.pad(X) 
+        X_ = self.pad(X);
         km = self.kernel(X_, self.X_train, **self.kernel_kwargs) # km stands for kernel matrix
         innerProd = km@self.v
         y_hat = 1 * (innerProd > 0)
 
         return y_hat 
-
 
 
     
