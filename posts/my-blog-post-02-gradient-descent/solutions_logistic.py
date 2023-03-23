@@ -1,4 +1,3 @@
-import typing
 from typing import TypeVar
 import random
 import numpy as np
@@ -32,6 +31,7 @@ class LogisticRegression():
         self.w_ = None
         self.omega_ = None 
         self.omega_previous = None 
+        self.last_loss = None
         self.loss_history = []
         self.score_history = []
 
@@ -69,7 +69,7 @@ class LogisticRegression():
 
 
         while (not done) and (i <= max_epochs): 
-            self.w_ -= alpha * self.gradient(self.w_, X_, y)                      # gradient step
+            self.w_ -= alpha * self.gradient(self.w_, X_, y) # gradient step
             new_loss = empirical_risk(X_, y, logistic_loss, self.w_) # compute loss
             
             history.append(new_loss)
@@ -84,6 +84,7 @@ class LogisticRegression():
             self.score_history.append(self.score(X_, y))
 
         # self.w_ = w
+        self.last_loss = new_loss
         self.loss_history = history
         
 
@@ -98,7 +99,6 @@ class LogisticRegression():
     def score(self, X, y) -> float:
         return 1 - self.loss(X,y) 
 
-
     # def loss(self, X,y):
     #     return 1-(predict(X, self.w_) == y).mean()
     def loss(self, X, y) -> float:
@@ -107,20 +107,22 @@ class LogisticRegression():
     def stochastic_loss(self, X, y) -> float:
         return empirical_risk(X, y, logistic_loss, self.omega_)
 
-
+    def stochastic_score(self, X, y) -> float:
+        return 1 - self.stochastic_loss(X,y) 
+        
 
     def fit_stochastic(self, X: np.array, y: np.array, max_epochs: float, momentum: bool, batch_size: int, alpha: float) -> None:
-        n = X.shape[0]
-        mu, nu = X.shape
+        # initialization
+        n, nu = X.shape
         X = self.pad(X)
-        W = np.random.randn(mu,nu)
-        my_w = W[1,:]
+        my_w = np.random.randn(nu) 
         b = 1
         self.omega_ = np.append(my_w, -b)
         self.omega_previous = np.append(my_w, -b)
         prev_loss = np.inf
         i = 0
         hist = []
+        self.score_history = []
         done = False
 
         if momentum:
@@ -144,8 +146,8 @@ class LogisticRegression():
                     self.omega_ = omega_next
 
                     new_loss = empirical_risk(X, y, logistic_loss, self.omega_) # compute loss
-                    
                     hist.append(new_loss)
+                    self.score_history.append(self.stochastic_score(X, y))
                     # check if loss hasn't changed and terminate if so
                     if np.isclose(new_loss, prev_loss):          
                         done = True
@@ -155,6 +157,7 @@ class LogisticRegression():
 
 
             # self.w_ = w
+            self.last_loss = new_loss
             self.stochastic_loss_history = hist
 
 
