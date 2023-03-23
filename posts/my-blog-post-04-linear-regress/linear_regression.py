@@ -17,16 +17,13 @@ class LinearRegression:
     def __init__(self):
         self.y = None
         self.w = None # w_gradient
-        self.w_analytic = None # w_analytic
-        # self.v = None
+        # self.w_analytic = None # w_analytic
         self.new_loss = None
         self.loss_history = [] 
         self.score_history = []
 
 
 
-    def sigmoid(self, z):
-        return 1 / (1 + np.exp(-z))
 
     def y_hat(self, X, w):
         return X@w
@@ -44,9 +41,11 @@ class LinearRegression:
     def gradient(self, P, q):
         return  P@self.w - q 
     
-    def fit_gradient(self, X_: np.array,  y: np.array, alpha = 0.0001, max_epochs = 1e3) -> None:
-        self.w = np.array([[0.99],
-                          [0.99]])
+    def fit_gradient(self, X_: np.array,  y: np.array, alpha = 0.00001, max_epochs = 1e4) -> None:
+        # self.w = np.array([[0.99],
+        #                   [0.99]])
+        features = X_.shape[1]
+        self.w = np.random.rand(features)
         self.score_history.append(self.score(X_,y))
         # initialization
         prev_loss = self.Big_L(X_ = X_, y = y) + 0.99 
@@ -57,7 +56,7 @@ class LinearRegression:
 
         # while loop iteration
         while (not done) and (i <= max_epochs): 
-            self.w = self.w - 2 * alpha * self.gradient(P, q)                      # gradient step
+            self.w = self.w - 2 * alpha * self.gradient(P, q) # gradient step
             self.new_loss = self.Big_L(X_ = X_, y = y) # compute loss
             # check if loss hasn't changed and terminate if so
             if np.isclose(self.new_loss, prev_loss, rtol=1e-05, atol=1e-08):          
@@ -73,7 +72,8 @@ class LinearRegression:
 
     def fit_analytic(self, X_: np.array, y: np.array) -> None:
         w_hat = np.linalg.inv(X_.T@X_)@X_.T@y
-        self.w_analytic = w_hat
+        # self.w_analytic = w_hat
+        self.w = w_hat
 
 
 
