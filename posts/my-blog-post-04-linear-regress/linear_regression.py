@@ -3,6 +3,7 @@ from typing import TypeVar
 from sklearn.linear_model import LogisticRegression
 from mlxtend.plotting import plot_decision_regions
 from scipy.optimize import minimize
+from sklearn.linear_model import Lasso
 
 import random
 import numpy as np
@@ -21,6 +22,9 @@ class LinearRegression:
         self.new_loss = None
         self.loss_history = [] 
         self.score_history = []
+        self.L = Lasso(alpha = 0.001)
+        self.lasso_score_history = []
+        self.fit_gradient_score_history = []
 
 
 
@@ -101,5 +105,37 @@ class LinearRegression:
 
     def myprint(self):
         print("it's working!")
+
+        
+    def LR_data(self, n_train = 100, n_val = 100, p_features = 1, noise = .1, w = None):
+        if w is None: 
+            w = np.random.rand(p_features + 1) + .2
+            # print(w)
+        
+        X_train = np.random.rand(n_train, p_features)
+        y_train = self.pad(X_train)@w + noise*np.random.randn(n_train)
+
+        X_val = np.random.rand(n_val, p_features)
+        y_val = self.pad(X_val)@w + noise*np.random.randn(n_val)
+        
+        return X_train, y_train, X_val, y_val
+
+
+# n_train = 100
+# n_val = 100
+# p_features = 1 
+# noise = 0.2
+
+    def lasso_score(self, n_train: int, n_val: int, noise: float) -> None:
+        for p_features in range(1, n_train+42):
+            X_train, y_train, X_val, y_val = self.LR_data(n_train, n_val, p_features, noise)
+            self.L.fit(X_train, y_train)
+            self.lasso_score_history.append(self.L.score(X_val, y_val))
+
+    def lin_regress_score(self, n_train: int, n_val: int, noise: float) -> None:
+        for p_features in range(1, n_train+42):
+            X_train, y_train, X_val, y_val = self.LR_data(n_train, n_val, p_features, noise)
+            self.fit_gradient(X_train, y_train)
+            self.fit_gradient_score_history.append(self.score(X_val, y_val))
 
         

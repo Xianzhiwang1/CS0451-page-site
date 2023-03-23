@@ -215,18 +215,16 @@ background-size: cover;
 
 
 
-<section id="frontmatter" class="level1">
-<h1>Frontmatter</h1>
+<section id="source" class="level3">
+<h3 class="anchored" data-anchor-id="source">Source</h3>
 <p><a href="https://github.com/Xianzhiwang1/CS0451-page-site/tree/main/posts/my-blog-post-01">Here</a> is a link to the source code for this perceptron blog post.</p>
 </section>
-<section id="under-construction." class="level1">
-<h1>Under Construction.</h1>
+<section id="introduction." class="level3">
+<h3 class="anchored" data-anchor-id="introduction.">Introduction.</h3>
+<p>In this blog post, we implement the perceptron algorithm, which is oftentimes the first machine learning algorithm a student encounters in a machine learning class (which is at least true in my case). We write code in Python for this implementation, and our goal is to classify binary labeled artificial data.</p>
 </section>
-<section id="implementation" class="level1">
-<h1>Implementation</h1>
-</section>
-<section id="under-construction.-1" class="level1">
-<h1>Under Construction.</h1>
+<section id="implementation" class="level3">
+<h3 class="anchored" data-anchor-id="implementation">Implementation</h3>
 <div class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext autoreload</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>autoreload <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -235,30 +233,38 @@ background-size: cover;
   %reload_ext autoreload</code></pre>
 </div>
 </div>
-<p>First, let’s import some libraries.</p>
-<div class="cell" data-execution_count="21">
+<p>First, let’s import some libraries that we need.</p>
+<div class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_blobs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_blobs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="33">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">12345</span>)</span>
+<p>In the following code cell, we will generate a linearly separable dataset of binary-labeled 2D points. The <code>make_blobs</code> function essentially takes <span class="math inline">\(n\)</span> samples, a number of features, and classes, and spits out a dataset of points with a data set with the given size, and label the data points using the classes. Visually, we see two clusters of points of two different color. In this special case where I set the seed, those two clusters seems linearly separable, which just means we could draw a straight line that completely seprates them. If we go to higher dimensions, then we need precise mathematical definitions, but we don’t need to worry about that right now.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>n<span class="op">=</span><span class="dv">100</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>p_features <span class="op">=</span> <span class="dv">3</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> make_blobs(n_samples <span class="op">=</span> <span class="dv">100</span>, n_features<span class="op">=</span>p_features<span class="op">-</span><span class="dv">1</span>, centers<span class="op">=</span>[ (<span class="op">-</span><span class="fl">1.7</span>,<span class="op">-</span><span class="fl">1.7</span>, <span class="op">-</span><span class="fl">1.7</span>), (<span class="fl">1.7</span>,<span class="fl">1.7</span>, <span class="fl">1.7</span>) ])</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># fig=plt.scatter(X[:,0], X[:,1], c=y)</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co"># xlab=plt.xlabel("feature 1")</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ylab=plt.ylabel("feature 2")</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>fig<span class="op">=</span>plt.scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>], c<span class="op">=</span>y)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>xlab<span class="op">=</span>plt.xlabel(<span class="st">"feature 1"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>ylab<span class="op">=</span>plt.ylabel(<span class="st">"feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
 </div>
-<p>We would like to apply the perceptron algorithm to find the hyperplane that separates those data points, given that they are separable (so perceptron algorithm will converge). A key equation in the perceptron algorithm that defines the update is the following:</p>
+</div>
+</section>
+<section id="the-perceptron-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="the-perceptron-algorithm">The Perceptron Algorithm</h3>
+<p>Our goal is to find the separating line using the perceptron algorithm. The algorithm takes in our feature matrix <code>X</code> and our vector of labels <code>y</code>. As detailed in the source code (link at the start of the blog), the algorithm performs the following steps: * Initialize the weights vector <code>w</code> * Iterate through the data points (randomly), updating the weights <code>w</code> until either a user-specified maximum number of iteration is reached. * record the accuracy score in <code>self.history</code>.</p>
+<p>State in mathematical terms, we would like to apply the perceptron algorithm to find the hyperplane that separates those data points, given that they are separable (so perceptron algorithm will converge). A key equation in the perceptron algorithm that defines the update is the following:</p>
+</section>
 <section id="tildewt1-tildewt-mathbb1-tildey_i-langle-tildewt-tildex_i-rangle-0tildey_itildex_i." class="level3">
 <h3 class="anchored" data-anchor-id="tildewt1-tildewt-mathbb1-tildey_i-langle-tildewt-tildex_i-rangle-0tildey_itildex_i."><span class="math display">\[ \tilde{w}^{(t+1)} = \tilde{w}^{t} + \mathbb{1} (\tilde{y}_i \langle \tilde{w}^{(t)}, \tilde{x}_i \rangle &lt; 0)\tilde{y}_i\tilde{x}_i.\]</span></h3>
+<p>And this will provide us with the step to update <code>w</code> in each iteration.</p>
 <div class="cell" data-execution_count="34">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> perceptron <span class="im">import</span> Perceptron</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -337,9 +343,9 @@ background-size: cover;
 </div>
 </div>
 </section>
-</section>
-<section id="under-construction" class="level1">
-<h1>under construction</h1>
+<section id="time-complexity-for-update-step" class="level3">
+<h3 class="anchored" data-anchor-id="time-complexity-for-update-step">Time complexity for update step</h3>
+<p>Recall our equation for the update step: <span class="math display">\[ \tilde{w}^{(t+1)} = \tilde{w}^{t} + \mathbb{1} (\tilde{y}_i \langle \tilde{w}^{(t)}, \tilde{x}_i \rangle &lt; 0)\tilde{y}_i\tilde{x}_i.\]</span> This involves taking an inner product $ ^{(t)}, _i , $ which has time complexity <span class="math inline">\(O(p)\)</span> where <span class="math inline">\(p\)</span> is a constant denoting the number of features. The other operations are addition, multiplication, taking the simple (step) function, which have constant time complexity <span class="math inline">\(O(1)\)</span>.</p>
 
 
 </section>
