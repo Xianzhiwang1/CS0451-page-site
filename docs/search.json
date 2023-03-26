@@ -35,6 +35,20 @@
     "text": "Let’s try a different data set\n\n\nX, y = make_moons(80, shuffle = True, noise = 0.1)\nplt.scatter(X[:,0], X[:,1], c = y)\nlabels = plt.gca().set(xlabel = \"Feature 1\", ylabel = \"Feature 2\")\n\nKLR.fit(X, y)\n\n# plot the graph\nplt.scatter(X[:,0], X[:,1], c = y)\nlabels = plt.gca().set(xlabel = \"Feature 1\", ylabel = \"Feature 2\")\n\n\n\nplot_decision_regions(X, y, clf = KLR)\nyourpredict = KLR.predict(X)\ntitle = plt.gca().set(title = f\"Accuracy = {(yourpredict == y).mean()}\",\n                      xlabel = \"Feature 1\", \n                      ylabel = \"Feature 2\")\n\nprint(KLR.predict(X))\nprint(\"OMG\")\nprint(y)\n\n[0 0 1 1 1 0 1 0 1 1 1 0 0 1 0 1 1 1 1 0 0 1 0 1 0 1 1 0 1 0 0 1 0 0 1 1 1\n 1 1 1 1 0 0 1 1 0 0 1 0 0 1 0 1 0 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 0 1 0 1 0\n 1 0 0 1 0 0]\nOMG\n[0 0 1 1 1 0 1 0 1 1 1 0 0 1 0 1 1 1 1 0 0 1 0 1 0 1 1 0 1 0 0 1 0 1 1 1 1\n 0 1 1 1 0 0 1 1 0 1 1 0 0 1 0 1 0 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 0 1 0 1 0\n 1 0 0 1 0 0]"
   },
   {
+    "objectID": "posts/my-blog-post-05-audit-bias/index.html",
+    "href": "posts/my-blog-post-05-audit-bias/index.html",
+    "title": "My Blog post on Auditing Allocative Bias",
+    "section": "",
+    "text": "Here is a link to the source code for this blog post."
+  },
+  {
+    "objectID": "posts/my-blog-post-05-audit-bias/index.html#whats-next",
+    "href": "posts/my-blog-post-05-audit-bias/index.html#whats-next",
+    "title": "My Blog post on Auditing Allocative Bias",
+    "section": "What’s next",
+    "text": "What’s next"
+  },
+  {
     "objectID": "posts/my-blog-post-01/index.html",
     "href": "posts/my-blog-post-01/index.html",
     "title": "My first Blog post on Perceptron",
@@ -67,7 +81,7 @@
     "href": "index.html",
     "title": "My Flabbergasted CSCI 0451 Blog",
     "section": "",
-    "text": "My blog post on Linear Regression\n\n\n\n\n\n\nMar 20, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nMy blog post on Kernel Logistic Regression\n\n\n\n\n\n\nMar 2, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nimplementing gradient descent\n\n\n\n\n\n\nFeb 24, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nMy first Blog post on Perceptron\n\n\n\n\n\n\nFeb 15, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nAn example blog post illustrating the key techniques you’ll need to demonstrate your learning in CSCI 0451.\n\n\n\n\n\n\nJan 10, 2023\n\n\nPhil Chodrow\n\n\n\n\n\n\nNo matching items"
+    "text": "My Blog post on Auditing Allocative Bias\n\n\n\n\n\n\nMar 24, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nMy blog post on Linear Regression\n\n\n\n\n\n\nMar 20, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nMy blog post on Kernel Logistic Regression\n\n\n\n\n\n\nMar 2, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nimplementing gradient descent\n\n\n\n\n\n\nFeb 24, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nMy first Blog post on Perceptron\n\n\n\n\n\n\nFeb 15, 2023\n\n\nXianzhi Wang\n\n\n\n\n\n\n  \n\n\n\n\n\n\n\n\nAn example blog post illustrating the key techniques you’ll need to demonstrate your learning in CSCI 0451.\n\n\n\n\n\n\nJan 10, 2023\n\n\nPhil Chodrow\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "about.html",

@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/my-blog-post-05-audit-bias/index.html",
       "/posts/my-blog-post-04-linear-regress/index.html",
       "/posts/my-blog-post-03-kernel-logistic/index.html",
       "/posts/my-blog-post-02-gradient-descent/index.html",
