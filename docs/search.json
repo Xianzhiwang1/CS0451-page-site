@@ -46,7 +46,7 @@
     "href": "posts/my-blog-post-05-audit-bias/index.html#whats-next",
     "title": "My Blog post on Auditing Allocative Bias",
     "section": "What’s next",
-    "text": "What’s next"
+    "text": "What’s next\n\nregress = model.fit(X_train, y_train)\n\n\nregress.score(X_test, y_test)\n\n0.8331855791962175\n\n\n\nmodel.score(X_test, y_test)\n\n0.8331855791962175\n\n\n\nfrom sklearn.metrics import classification_report\nprint(classification_report(y_test, y_hat))\n\n              precision    recall  f1-score   support\n\n       False       0.82      0.89      0.85      7277\n        True       0.86      0.77      0.81      6259\n\n    accuracy                           0.83     13536\n   macro avg       0.84      0.83      0.83     13536\nweighted avg       0.83      0.83      0.83     13536"
   },
   {
     "objectID": "posts/my-blog-post-01/index.html",
