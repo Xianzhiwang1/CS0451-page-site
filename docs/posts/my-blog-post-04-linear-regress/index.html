@@ -228,11 +228,11 @@ background-size: cover;
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>autoreload <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>First, let’s import some libraries, then we perform our <code>fit_gradient</code> and <code>fit_analytic</code> on the following simple data set with only one features to visualize our linear regression.</p>
-<div class="cell" data-execution_count="79">
+<div class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">18</span>,<span class="dv">6</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">12</span>,<span class="dv">6</span>)</span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'figure.dpi'</span>] <span class="op">=</span> <span class="dv">78</span> </span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'savefig.dpi'</span>] <span class="op">=</span> <span class="dv">156</span> </span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> linear_regression <span class="im">import</span> LinearRegression </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -242,7 +242,7 @@ background-size: cover;
 <h3 class="anchored" data-anchor-id="fitting-linear-regression-using-gradient-descent-a.k.a.-fit_gradient">Fitting Linear Regression using gradient descent; a.k.a. <code>fit_gradient</code></h3>
 <p>In <code>fit_gradient</code>, the key step is to compute the gradient using a descent algorithm so that we could solve the following problem: <span class="math display">\[ \hat{w} = \arg \min_{w} L(w). \]</span> Equivalently, we could unpact this equation: <span class="math display">\[ \hat{w} = \sum_{i=1}^{n} \ell(\hat{y}_i, y_i) = \argmin_{w} \sum_{i=1}^{n} ( \langle w, x_i \rangle - y_i)^2.\]</span> Recall that our loss function is of the form $ (, y) = (-y)^2 $ since we are using ordinary least square regression.</p>
 <p>We start by taking derivative with respect to <span class="math inline">\(w.\)</span> Using chain rule for matrices, we obtain the following expression: <span class="math display">\[ \nabla L(w) = 2 X^{T}(X\cdot w -y).\]</span> Then, we use gradient descent to find the <span class="math inline">\(w\)</span> that is “good enough.” We achieve this by the following iteration: <span class="math display">\[ w^{(t+1)} \leftarrow w^{(t)} - 2 \cdot \alpha \cdot X^{T} (X \cdot w^{(t)} - y).\]</span></p>
-<div class="cell" data-execution_count="80">
+<div class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We start by generate a small data set.</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>w0 <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>w1 <span class="op">=</span>  <span class="fl">0.7</span></span>
@@ -259,28 +259,33 @@ background-size: cover;
 </div>
 <p>We are able to generate data and visualize this problem when <code>p_features = 1</code>. Graphically, we are trying to draw a line “of best fit” through the data points in the sense of OLS, which stands for Ordinary Least Squares. The line we draw just means given the feature <code>x</code>, we find the corresponding predicted <code>y</code> using the line, which will be close to the original <code>y</code>, if we have done a good job.</p>
 <p>After importing <code>linear_regression.py</code>, we could call the <code>fit_gradient</code> method that implements the gradient descent algorithm for us, as illustrated in the above cell. In the following cell, we plot the “line of best fit” using the weights <code>LR1.w</code> that we obtained after running <code>fit_gradient</code>.</p>
-<div class="cell" data-execution_count="81">
+<div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>LR1 <span class="op">=</span> LinearRegression()</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>X_ <span class="op">=</span> LR1.pad(x)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>LR1.fit_gradient(X_, y)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>LR1.fit_gradient(X_, y, alpha<span class="op">=</span><span class="fl">0.0001</span>, max_epochs<span class="op">=</span><span class="fl">1e4</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>plt.scatter(x, y)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>plt.plot(x, X_<span class="op">@</span>LR1.w, color <span class="op">=</span> <span class="st">"black"</span>)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature (x)"</span>, ylabel <span class="op">=</span> <span class="st">"Target (y)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature (x)"</span>, ylabel <span class="op">=</span> <span class="st">"Target (y)"</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(LR1.w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[ 0.62865065]
+ [-0.46565231]]</code></pre>
+</div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-5-output-1.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-5-output-2.png" class="img-fluid"></p>
 </div>
 </div>
 </section>
 <section id="fitting-linear-regression-using-a-analytic-formula-a.k.a.-fit_analytic" class="level3">
 <h3 class="anchored" data-anchor-id="fitting-linear-regression-using-a-analytic-formula-a.k.a.-fit_analytic">Fitting Linear Regression using a analytic formula; a.k.a. <code>fit_analytic</code></h3>
 <p>Similarly to <code>fit_gradient</code>, we also have a method called <code>fit_analytic</code>, which uses a formula to compute the weights <code>w</code> exactly, and this is implemented using the followiing equation: <span class="math display">\[ \hat{w} = (X^T X)^{-1} X^T y, \]</span> where <span class="math inline">\(\hat{w}\)</span> denotes the weights we obtained after calling the function <code>fit_analytic</code>. Note that in order for this formula to make sense, we need <code>X</code> to be a invertible matrix. Now, with the math part out of the way, let’s see this in action using the following code:</p>
-<div class="cell" data-execution_count="82">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LinearRegression()</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>X_ <span class="op">=</span> LR.pad(x)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>LR.fit_analytic(X_,y)</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>plt.scatter(x, y)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>plt.plot(x, X_<span class="op">@</span>LR.w, color <span class="op">=</span> <span class="st">"black"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature (x)"</span>, ylabel <span class="op">=</span> <span class="st">"Target (y)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LinearRegression()</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>X_ <span class="op">=</span> LR.pad(x)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>LR.fit_analytic(X_,y)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>plt.scatter(x, y)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>plt.plot(x, X_<span class="op">@</span>LR.w, color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature (x)"</span>, ylabel <span class="op">=</span> <span class="st">"Target (y)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
 </div>
@@ -290,61 +295,42 @@ background-size: cover;
 <h3 class="anchored" data-anchor-id="more-than-one-feature">More than one feature</h3>
 <p>Now we use the following function to create both testing and validation data. At this stage, we could experiment with more features.</p>
 <p>When the number of features is one, <code>p_features = 1</code>, we could plot the artificial training data set and the validation data set. We lose this luxury when we have 2 or more features.</p>
-<div class="cell" data-execution_count="83">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>n_train <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>n_val <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>p_features <span class="op">=</span> <span class="dv">1</span> </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>noise <span class="op">=</span> <span class="fl">0.2</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co"># create some data</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LinearRegression()</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>X_train, y_train, X_val, y_val <span class="op">=</span> LR.LR_data(n_train, n_val, p_features, noise)</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># plot it</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, sharex <span class="op">=</span> <span class="va">True</span>, sharey <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].scatter(X_train, y_train)</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].scatter(X_val, y_val)</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">0</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Training"</span>, xlabel <span class="op">=</span> <span class="st">"x"</span>, ylabel <span class="op">=</span> <span class="st">"y"</span>)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">1</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Validation"</span>, xlabel <span class="op">=</span> <span class="st">"x"</span>)</span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n_train <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>n_val <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>p_features <span class="op">=</span> <span class="dv">1</span> </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>noise <span class="op">=</span> <span class="fl">0.2</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># create some data</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LinearRegression()</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>X_train, y_train, X_val, y_val <span class="op">=</span> LR.LR_data(n_train, n_val, p_features, noise)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="co"># plot it</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, sharex <span class="op">=</span> <span class="va">True</span>, sharey <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].scatter(X_train, y_train)</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].scatter(X_val, y_val)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">0</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Training"</span>, xlabel <span class="op">=</span> <span class="st">"x"</span>, ylabel <span class="op">=</span> <span class="st">"y"</span>)</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">1</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Validation"</span>, xlabel <span class="op">=</span> <span class="st">"x"</span>)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-7-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 <p>Now we experiment with the number of features being <code>n_train - 1</code>, which quite a lot features.</p>
-<div class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>n_train <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>n_val <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>p_features <span class="op">=</span> n_train <span class="op">-</span> <span class="dv">1</span> </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>noise <span class="op">=</span> <span class="fl">0.2</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># create some data</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>X_train, y_train, X_val, y_val <span class="op">=</span> LR.LR_data(n_train, n_val, p_features, noise)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[0.63670274 0.80630268 0.35513237 0.91438401 1.16299646 0.25471538
- 0.41929398 0.33128811 0.20562377 1.01101763 1.03533991 0.52161055
- 1.06408515 0.97373593 0.90195551 0.66708621 1.0553234  0.9038803
- 0.61806445 0.98863527 0.28500621 0.71033293 0.3895933  1.16001778
- 0.40914841 0.56370937 1.11308954 0.7595861  0.25039412 0.32132671
- 0.37317078 0.34757871 0.35170662 0.21077583 1.07547584 1.13214022
- 0.24784227 0.50182363 0.50983977 1.10205703 0.44692467 0.34827051
- 0.50807989 0.57485158 1.11593703 0.30167099 1.03100803 0.43282352
- 0.97354337 0.82979848 0.22099813 0.44731208 0.81564771 0.59497909
- 0.29111052 0.53750411 0.79428553 0.58251937 1.15713839 0.31408165
- 0.59708775 0.81603557 0.9006841  1.06787209 0.8839062  0.48405233
- 0.98376161 1.12966603 1.16950196 0.73324542 0.49236504 0.34219561
- 0.40279833 0.3268641  0.55424444 0.69369508 0.64131131 0.37501194
- 0.52423439 0.78499193 0.34587613 0.82398686 0.88436386 1.0896536
- 0.92725116 0.54739758 0.80205799 1.12189711 0.32002073 1.0173303
- 0.97576977 0.55629244 0.55567143 0.71001839 0.98502912 0.55223488
- 0.9632969  0.97102891 0.70019774 0.76183673]</code></pre>
-</div>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>n_train <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>n_val <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>p_features <span class="op">=</span> n_train <span class="op">-</span> <span class="dv">1</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>noise <span class="op">=</span> <span class="fl">0.2</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># create some data</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>X_train, y_train, X_val, y_val <span class="op">=</span> LR.LR_data(n_train, n_val, p_features, noise)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Here’s the snippets within the <code>fit_gradient</code> function that makes the same code work for different number of features:</p>
 <p><code>features = X_.shape[1]</code></p>
 <p><code>self.w = np.random.rand(features)</code></p>
-<div class="cell" data-execution_count="10">
+<div class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> linear_regression <span class="im">import</span> LinearRegression </span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LinearRegression()</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>X_train_ <span class="op">=</span> LR.pad(X_train)</span>
@@ -354,77 +340,64 @@ background-size: cover;
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Validation score = </span><span class="sc">{</span>LR<span class="sc">.</span>score(X_val_, y_val)<span class="sc">.</span><span class="bu">round</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Training score = 1.0
-Validation score = -28.9927</code></pre>
+Validation score = 0.6</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="11">
+<div class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The estimated weight vector w is</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(LR.w)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training Loss = </span><span class="sc">{</span>LR<span class="sc">.</span>Big_L(X_train_, y_train)<span class="sc">.</span><span class="bu">round</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Validation Loss = </span><span class="sc">{</span>LR<span class="sc">.</span>Big_L(X_val_, y_val)<span class="sc">.</span><span class="bu">round</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[ -6.98654837  -5.11475728   8.57443208   5.07362523  -4.87413305
-   1.56026393   0.72491913   6.30882348   2.53666501  -4.92871486
-  -0.34034587   1.59120555  -2.528114    -2.78795259   5.15328034
-   4.27929691   4.4974397    0.49911716   5.42071211   3.08095628
-   0.73021938   3.88593999  -1.4181669    9.13986037   9.40915052
-  -0.31260307  -2.27939577  -2.28677311   2.2816238    0.13271794
-  -6.15093261  -2.76268557   0.66617876  -1.72896585  -3.63483613
-   1.79880844   0.06002997   1.63561401   3.63579881   2.83111064
-  -0.01094197   2.07372372   1.00556763  -7.67616558   7.44297791
-   5.04437298   4.30471381   0.77607148   4.81262528   4.81503507
-   0.21150729   1.84560229  -2.0094033   10.22625218   6.35957177
-   2.24820699  -3.27148277   4.4020253   -3.85757669  -1.47929074
-  -1.47511316   3.41494346   1.51279448 -10.41771156   1.96379535
-  -1.16326796  -3.74895009   1.55522698   1.72993542  -3.15904913
-  -2.15681793  -2.46951596  -3.10286333  -2.54008191  10.34623135
-   8.09693242   2.4651751   -0.81581193   0.91847796  -1.97853034
-   1.02250488  -8.2642525    4.05232048  -4.72529527   8.2724321
-   8.59203294   7.42419234  -3.79828989   3.81754082  -3.36718803
-  -1.58881632   4.23229791   1.07026613  -4.52381751  -0.6137537
-   3.19538746  -5.06610057   2.97739053   3.43978605 -10.01714519]
+<pre><code>[ 3.35897356e-01  4.26186197e-01  1.26846746e+00  7.84211123e-01
+ -3.83847317e-01  1.12476383e+00  1.27548460e-01  1.44945056e+00
+  4.23710897e-01  1.03434529e+00  3.14411746e-04  7.38434109e-01
+  6.66869057e-01  9.88374014e-01  1.39650694e-01  1.61561280e+00
+ -7.32810852e-02  1.18823622e+00  4.23977138e-01  4.59456287e-01
+  4.16221197e-01  6.11369776e-01  2.10592793e-01  7.56427448e-01
+  2.01039541e+00  8.54031498e-01  1.51972728e+00  2.13364718e+00
+  5.68214196e-01  7.31101878e-01  1.46595210e+00  3.62402525e-01
+  1.70384015e-01  1.74795781e+00  1.09920081e+00  8.85624086e-01
+  7.91649159e-01  1.04335925e+00  2.55091015e-01  4.36460557e-01
+  9.02836076e-01  1.03472739e+00  2.53444971e-01  1.16992604e+00
+  1.17502661e+00  1.60616968e+00  8.92517928e-01  1.17984463e+00
+  9.72370518e-01  7.84570517e-01  6.13407131e-01  1.82624254e-01
+  1.52647310e+00  3.56741472e-01 -1.36790063e-01  9.32492493e-01
+  2.05640102e-01 -4.90872864e-04  1.95228099e+00  8.77542419e-01
+  3.24513252e-01  1.16658648e+00  3.41576980e-01  7.83140284e-01
+  2.33524385e-01  1.69279466e-01  8.49165950e-01  7.08840863e-01
+  8.08062472e-01  1.43853192e+00  8.07330790e-01  2.42391206e-01
+  1.89684664e-01  5.56339418e-01  1.05182184e+00  1.92041481e-01
+  1.62428088e+00  1.15523659e+00  7.22670860e-02  6.26346242e-01
+  3.24810374e-01  9.05203459e-01  3.34005575e-01  2.70030136e-01
+  2.07055509e+00  1.20485638e-01  6.20570682e-01  7.31745189e-01
+  8.87124750e-01  3.62741853e-01  1.07659053e+00  1.06243014e+00
+  5.76305831e-01  7.42427220e-01  8.49695458e-01  1.11026933e+00
+  8.31153886e-01  8.82070331e-01  5.20352496e-01 -1.54371874e+00]
 Training Loss = 0.0
-Validation Loss = 127.55</code></pre>
+Validation Loss = 12.5</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="84">
+<div class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>LR2 <span class="op">=</span> LinearRegression()</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>LR2.fit_gradient(X_train_, y_train)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(LR2.w)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training score = </span><span class="sc">{</span>LR2<span class="sc">.</span>score(X_train_, y_train)<span class="sc">.</span><span class="bu">round</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Validation score = </span><span class="sc">{</span>LR2<span class="sc">.</span>score(X_val_, y_val)<span class="sc">.</span><span class="bu">round</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.plot(LR2.score_history)</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="co"># labels = plt.gca().set(xlabel = "Iteration", ylabel = "Score")</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co"># plot it</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, sharex <span class="op">=</span> <span class="va">True</span>, sharey <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].plot(LR2.score_history)</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].plot(LR2.loss_history)</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">0</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Score History"</span>, xlabel <span class="op">=</span> <span class="st">"Iteration"</span>, ylabel <span class="op">=</span> <span class="st">"Score"</span>)</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">1</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Loss History"</span>, xlabel <span class="op">=</span> <span class="st">"Iteration"</span>, ylabel <span class="op">=</span> <span class="st">"Loss"</span>)</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Training score = </span><span class="sc">{</span>LR2<span class="sc">.</span>score(X_train_, y_train)<span class="sc">.</span><span class="bu">round</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Validation score = </span><span class="sc">{</span>LR2<span class="sc">.</span>score(X_val_, y_val)<span class="sc">.</span><span class="bu">round</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># plt.plot(LR2.score_history)</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># labels = plt.gca().set(xlabel = "Iteration", ylabel = "Score")</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="co"># plot it</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, sharex <span class="op">=</span> <span class="va">True</span>, sharey <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].plot(LR2.score_history)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].plot(LR2.loss_history)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">0</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Score History"</span>, xlabel <span class="op">=</span> <span class="st">"Iteration"</span>, ylabel <span class="op">=</span> <span class="st">"Score"</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">1</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Loss History"</span>, xlabel <span class="op">=</span> <span class="st">"Iteration"</span>, ylabel <span class="op">=</span> <span class="st">"Loss"</span>)</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[-0.20730123 -0.10563761 -0.04331693 -0.00528231 -0.03864546  0.20381776
- -0.05058807  0.09897661 -0.23666211 -0.04745521 -0.09628566 -0.06007894
- -0.00293812 -0.23792177 -0.28955936  0.38736089 -0.07006736  0.08088374
-  0.00716853 -0.0006278   0.2240491   0.06680124  0.00111919 -0.05138886
- -0.07234929  0.07246345  0.01503877  0.22095489 -0.19050604  0.09697002
-  0.35113102  0.03081831  0.02848697  0.05718335  0.3128769  -0.04744243
- -0.09384127  0.0461694  -0.07016828 -0.18265418 -0.06310132 -0.03878799
- -0.03360858  0.15358426  0.09114134  0.01098115  0.18489818  0.12992281
- -0.01964716 -0.1044456  -0.14721869  0.11660055  0.12062055 -0.17593815
-  0.02284532  0.21732949 -0.06782414  0.07885989  0.2388482   0.04190066
- -0.1334721   0.18011153  0.0589412   0.18815147 -0.08703769  0.05793441
-  0.16260986  0.21210384  0.2572599   0.2653863   0.06953257 -0.01190953
- -0.09302429  0.14318161 -0.39411885 -0.11087632  0.08670985  0.14353901
-  0.14843897  0.17259912 -0.36645424  0.19819852 -0.11994269 -0.07898799
-  0.0017135  -0.13569758 -0.0864135   0.05430258  0.2357325  -0.13604224
-  0.11539929  0.19568275  0.02044613 -0.02506049 -0.25401755  0.12637279
-  0.1798561  -0.02142761  0.01923038  0.01621497]
-Training score = 0.3914
-Validation score = -2.042</code></pre>
+<pre><code>Training score = -657.0863
+Validation score = -651.8489</code></pre>
 </div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-11-output-2.png" class="img-fluid"></p>
@@ -434,11 +407,11 @@ Validation score = -2.042</code></pre>
 <section id="lasso-regularization" class="level3">
 <h3 class="anchored" data-anchor-id="lasso-regularization">LASSO Regularization</h3>
 <p>In this last section, we use a modified loss function of the following expression: <span class="math display">\[ L(w) = \lVert X \cdot w -y \rVert ^2_2 + \sum_{j=1}^{p-1} \alpha \cdot | w_j | \]</span></p>
-<div class="cell" data-execution_count="13">
+<div class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> Lasso</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>L <span class="op">=</span> Lasso(alpha <span class="op">=</span> <span class="fl">0.001</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="28">
+<div class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>n_train <span class="op">=</span> <span class="dv">30</span> </span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>n_val <span class="op">=</span> <span class="dv">30</span></span>
@@ -448,57 +421,43 @@ Validation score = -2.042</code></pre>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>X_train, y_train, X_val, y_val <span class="op">=</span> LR.LR_data(n_train, n_val, p_features, noise)</span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>L.fit(X_train, y_train)</span>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>L.score(X_val, y_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="28">
-<pre><code>0.557327771070066</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>0.721964478771783</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="54">
+<div class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>LR4 <span class="op">=</span> LinearRegression()</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>LR4.lasso_score(n_train, n_val, noise)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>LR4.lin_regress_score(n_train, n_val, noise)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>/Users/xianzhiwang/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_coordinate_descent.py:631: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 4.416e-02, tolerance: 3.952e-02
-  model = cd_fast.enet_coordinate_descent(
-/Users/xianzhiwang/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_coordinate_descent.py:631: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 7.083e-02, tolerance: 5.877e-02
-  model = cd_fast.enet_coordinate_descent(
-/Users/xianzhiwang/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_coordinate_descent.py:631: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 7.936e-02, tolerance: 5.085e-02
-  model = cd_fast.enet_coordinate_descent(
-/Users/xianzhiwang/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_coordinate_descent.py:631: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 5.962e-02, tolerance: 5.838e-02
-  model = cd_fast.enet_coordinate_descent(
-/Users/xianzhiwang/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_coordinate_descent.py:631: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 8.074e-02, tolerance: 5.375e-02
-  model = cd_fast.enet_coordinate_descent(
-/Users/xianzhiwang/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_coordinate_descent.py:631: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 6.018e-02, tolerance: 5.204e-02
-  model = cd_fast.enet_coordinate_descent(
-/Users/xianzhiwang/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_coordinate_descent.py:631: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 1.358e-01, tolerance: 8.331e-02
-  model = cd_fast.enet_coordinate_descent(
-/Users/xianzhiwang/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_coordinate_descent.py:631: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 8.265e-02, tolerance: 6.840e-02
-  model = cd_fast.enet_coordinate_descent(
-/Users/xianzhiwang/opt/anaconda3/envs/ml-0451/lib/python3.9/site-packages/sklearn/linear_model/_coordinate_descent.py:631: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 1.160e-01, tolerance: 8.020e-02
-  model = cd_fast.enet_coordinate_descent(</code></pre>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>LR4.lin_regress_score(n_train, n_val, noise)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>LR4.lin_regress_score_analytic(n_train, n_val, noise)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell-output cell-output-error">
-<pre><code>KeyboardInterrupt: </code></pre>
-</div>
-</div>
-<div class="cell" data-execution_count="85">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># from matplotlib.pyplot import figure</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="co"># figure(figsize=(8, 6), dpi = 156)</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, sharex <span class="op">=</span> <span class="va">False</span>, sharey <span class="op">=</span> <span class="va">False</span>)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].plot(LR4.lasso_score_history)</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].plot(LR4.fit_gradient_score_history)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">0</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"LASSO Score History"</span>, xlabel <span class="op">=</span> <span class="st">"number of features"</span>, ylabel <span class="op">=</span> <span class="st">"Score"</span>)</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">1</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Linear regression Score History"</span>, xlabel <span class="op">=</span> <span class="st">"number of features"</span>, ylabel <span class="op">=</span> <span class="st">"Score"</span>)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># from matplotlib.pyplot import figure</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="co"># figure(figsize=(8, 6), dpi = 156)</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, sharex <span class="op">=</span> <span class="va">False</span>, sharey <span class="op">=</span> <span class="va">False</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].plot(LR4.lasso_score_history)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].plot(LR4.fit_gradient_score_history)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">2</span>].plot(LR4.fit_analytic_score_history)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">0</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"LASSO Score History"</span>, xlabel <span class="op">=</span> <span class="st">"number of features"</span>, ylabel <span class="op">=</span> <span class="st">"Score"</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">1</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Linear regression fit_gradient Score History"</span>, xlabel <span class="op">=</span> <span class="st">"number of features"</span>, ylabel <span class="op">=</span> <span class="st">"Score"</span>)</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> axarr[<span class="dv">2</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="st">"Linear regression fit_analytic Score History"</span>, xlabel <span class="op">=</span> <span class="st">"number of features"</span>, ylabel <span class="op">=</span> <span class="st">"Score"</span>)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-15-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell" data-execution_count="57">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(LR4.lasso_score_history)</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(LR4.fit_gradient_score_history)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(LR4.lasso_score_history)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"***"</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(LR4.fit_gradient_score_history)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"***"</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(LR4.fit_analytic_score_history)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[0.6620134086527454, 0.7926652719544164, 0.7636216364918889, 0.7909619588951335, 0.8645992981586434, 0.8035728463544629, 0.8876763854143038, 0.8825528989471548, 0.8999645997553866, 0.9204144321545072, 0.9036502575751295, 0.9238042101891167, 0.9130491832790616, 0.9564958075480152, 0.9123523996274471, 0.9481736724093577, 0.9408155633323741, 0.9531214026635366, 0.9565368685279597, 0.9207839048724966, 0.9408003015258696, 0.9392737935629251, 0.946157051544213, 0.956997646406508, 0.9421334731115686, 0.9597226602720572, 0.9463221520441731, 0.9538853236888134, 0.9680544210629696, 0.9624507331053962, 0.9666915821265389, 0.9572390152046465, 0.9486495579876864, 0.9676815675127243, 0.9524032529564634, 0.9675283275131255, 0.9472936616302995, 0.970347778989878, 0.9665539116544122, 0.9738129521335204, 0.9555171068252105, 0.9612870258755014, 0.9671522961768058, 0.9659453362023974, 0.945242931456526, 0.8923291792428418, 0.968511774255436, 0.9803940514695835, 0.9532468095489877, 0.9279866466777582, 0.9756748126605774, 0.9580956960799869, 0.9671130026776822, 0.9659167437143412, 0.972199368588313, 0.9655237631740734, 0.9777107989445485, 0.939582636050352, 0.9628917193706108, 0.9555918611832371, 0.9653594464973367, 0.9368380439800654, 0.9493618553592368, 0.9642932042674554, 0.9731180682164032, 0.9597145953032044, 0.9626469367253617, 0.9449114006158158, 0.9465105575413985, 0.9286954644985084, 0.9404265023540571, 0.9527045186691424, 0.9254418882208905, 0.916390283956204, 0.9725195770294937, 0.9613623768600648, 0.936822976733226, 0.9494894512649069, 0.91851813304406, 0.9373279771194486, 0.9271088767614978, 0.9232823603751628, 0.9578438671593265, 0.9631761278031633, 0.847254419173977, 0.890709938607362, 0.9123779677748304, 0.9371227104511238, 0.7758552317935522, 0.8492576877283446, 0.7532906138001103, 0.7307697614489437, 0.6901337517790225, 0.7643319710264794, 0.834985390762478, 0.7863595972193863, 0.6805404357370728, 0.7685003827789387, 0.8191368447201366, 0.8907633169113939, 0.7775398701688743, 0.7774518524409693, 0.591737349413717, 0.7609165316722868, 0.7695149522844223, 0.6306362529649474, 0.47172760507303324, 0.6073980100796071, 0.7290145643482713, 0.7951102890286174, 0.6384081372534829, 0.7202307341791766, 0.6466076072658353, 0.6317188763137664, 0.4993856623005043, 0.4728207467368597, 0.5857548529626517, 0.4969374491478511, 0.7203254279648479, 0.45870768539600415, 0.5941603678664984, 0.5717429286347755, 0.5318891568177826, 0.4244814354489278, 0.6517289032444603, 0.5058336149374157, 0.5874799181033838, 0.4059717459780787, 0.5447854882863031, 0.30762060992211515, 0.21928544408566464, 0.39789691834735885, 0.411548461984635, 0.2548094462297046, 0.5575117793968875, 0.3933449432426236, 0.3926270588447518, 0.09873090908764459, 0.3821478149081805, 0.4640049165204918, 0.25979735931998216]
-[-0.8249617908118685, 0.8121432205380077, 0.4639197616445587, 0.36531810260796205, 0.6617616804177566, 0.7729015288733523, 0.7361030432966176, 0.8555200641823753, 0.9045627506203497, 0.8284163485104935, 0.8541791435457786, 0.911447944171333, 0.9215357108555404, 0.8667100960202782, 0.9119013163057852, 0.8847459864105149, 0.8483191440470397, 0.903013626397807, 0.9383893723783573, 0.8667160057400336, 0.9528839210881687, 0.9047967398946285, 0.9420396841451046, 0.9057525293628661, 0.9038854988476893, 0.943686262613224, 0.8765514949474006, 0.9535605712193543, 0.9342807667989528, 0.9428033432347753, 0.9470360188346756, 0.8621041736116027, 0.9434064427812061, 0.9466002252347184, 0.9569869552589783, 0.8978494097791345, 0.9182118929044777, 0.9046343476447372, 0.9304381146955548, 0.8944719454830504, 0.9479359752444244, 0.9320961999145093, 0.9481595010301163, 0.926002155617684, 0.9300137189892773, 0.9349528805100566, 0.9205291720605397, 0.912497844855618, 0.9517022815527717, 0.9636762826285734, 0.9399693310316238, 0.9237235111024888, 0.8960262898168136, 0.9138858091514634, 0.8936177825726954, 0.9399443612622592, 0.9392554866835118, 0.9305235179922433, 0.947957120295502, 0.9390288559927166, 0.9125582845223968, 0.9124849338102969, 0.9599514785517649, 0.9203624631280505, 0.8852503952860189, 0.9240596590416974, 0.9569672185938854, 0.9067830750591351, 0.8817457950416756, 0.9463673740193816, 0.8944389490948083, 0.9250141383260846, 0.8827914285646317, 0.9268852044225158, 0.935221607147371, 0.9151770680566815, 0.9361822524115295, 0.9248858182294418, 0.8566830985903884, 0.9049300919450286, 0.8931381492296803, 0.9193676339468935, 0.9394313323992707, 0.8834254680571255, 0.8943931203691251, 0.9031269244676963, 0.9286902372165995, 0.8966371764073809, 0.927615513613402, 0.9076991520331388, 0.9321716948039015, 0.9108336900768844, 0.8846584144670369, 0.9325712472464127, 0.8673002727136925, 0.9297756000050073, 0.8995589719262822, 0.8615778944708705, 0.8592620486876347, 0.908066081487866, 0.8998773088372259, 0.8970108969997423, 0.8820871729943264, 0.8901255227582149, 0.8671497448064913, 0.8817337838178306, 0.9292240909628517, 0.8797672629787175, 0.9002705737760063, 0.8689735106087924, 0.9007801999522664]</code></pre>
+<pre><code>[-1.7700549310005502, -5.137909348273133, -9.274841660467956, -7.681489796048626, -7.3255260821958705, -24.005163641299532, -19.135550322502123, -31.348653994040852, -23.91004118879128, -47.47525250817049, -39.885103376251685, -28.464507570828516, -14.378534389284948, -27.419060406337177, -22.535726854611458, -50.71947803644064, -58.52138776931577, -34.353448619227585, -72.52444472077835, -122.5700388722237, -46.4210177063708, -93.45121027939727, -96.91440538678344, -97.4422732695729, -159.4308536567463, -63.7940485464868, -86.64195935686408, -60.699623076897254, -140.2810073062632, -80.2746785152847, -91.8797177525378]
+***
+[-9.09306697414251, -3.3048735388131067, -8.590351176123235, -1.6703326469442326, -4.366415735943305, -2.4683137908837125, -0.9002939492942068, -6.373341227075679, -4.441457325008997, -1.1734526672994785, -4.250000926865212, -5.089895642465178, -8.506727626491168, -5.040309697836913, -3.142518284794746, -4.823483232455338, -3.14213978426303, -1.5249519377081748, -3.2799860344456855, -1.9873785109238202, -3.1971912768394466, -3.6749385569467927, -12.868901685499768, -6.379287591312853, -5.329487519631858, -2.98163744908231, -1.0952052613531844, -4.305273684599754, -5.296223124071842, -5.663713212744818, -8.026074798635358]
+***
+[-2.0650614211118214, -1.9674876338039926, -3.3786988282992603, -1.852999415328053, -1.977770600829651, -1.991073140814121, -3.2633567845124327, -2.489010907559757, -2.810803704549485, -1.491061477738191, -3.468887425259103, -1.4005782334817836, -3.272196858045522, -3.2224615484538504, -3.1750464526687594, -4.78675631871054, -3.604197423615691, -11.195525638424005, -3.4410173976263847, -2.675184377455617, -3.575974972508643, -2.692621597873615, -4.038193192818648, -12.347879739541648, -6.589224150610449, -5.041183601154226, -6.16262245261774, -5.443997649451676, -2.7375520875066317, -107.05959173199133, -35.85909769539286]</code></pre>
 </div>
 </div>
 
