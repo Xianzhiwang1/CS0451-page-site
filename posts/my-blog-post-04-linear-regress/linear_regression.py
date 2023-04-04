@@ -46,7 +46,7 @@ class LinearRegression:
     def gradient(self, P, q):
         return  P@self.w - q 
     
-    def fit_gradient(self, X_: np.array,  y: np.array, alpha = 0.00001, max_epochs = 1e2) -> None:
+    def fit_gradient(self, X_: np.array,  y: np.array, alpha: float, max_epochs: int) -> None:
         # self.w = np.array([[0.99],
         #                   [0.99]])
         features = X_.shape[1]
@@ -135,18 +135,6 @@ class LinearRegression:
         print("it's working!")
 
         
-    def LR_data(self, n_train = 100, n_val = 100, p_features = 1, noise = .1, w = None):
-        if w is None: 
-            w = np.random.rand(p_features + 1) + .2
-            # print(w)
-        
-        X_train = np.random.rand(n_train, p_features)
-        y_train = self.pad(X_train)@w + noise*np.random.randn(n_train)
-
-        X_val = np.random.rand(n_val, p_features)
-        y_val = self.pad(X_val)@w + noise*np.random.randn(n_val)
-        
-        return X_train, y_train, X_val, y_val
 
     def data(self, n_train = 100, n_val = 100, p_features = 1, noise = .1, w = None):
         if w is None: 
