@@ -2,6 +2,7 @@
 from sklearn.datasets import make_blobs, make_circles
 from matplotlib import pyplot as plt
 import numpy as np
+import numpy.linalg as linalg
 import networkx as nx
 from sklearn.neighbors import NearestNeighbors
 from sklearn.metrics import pairwise_distances
@@ -32,9 +33,13 @@ class spectral:
         # print(evalue)
         # print("evector")
         # print(evector)
-
-        # access column 1 
-        return evector[:, 1] 
+        k = self.L.shape[1] 
+        idx = evalue.argsort()[:k][::-1] 
+        evalue = evalue[idx]
+        evector = evector[:, idx]
+        # access eigenvector associated with the second smallest eigenvalue 
+        index = evector.shape[1]
+        return evector[:, index-2] 
 
 
 
@@ -59,7 +64,6 @@ class spectral:
             nx.draw(G, pos = X, alpha = .4, node_color = z, node_size = 20, edge_color = colors, width = widths, ax = ax, cmap=plt.cm.cividis)
 
         plt.gca().set(xlabel = "Feature 1", ylabel = "Feature 2")
-    fig, ax = plt.subplots(figsize = (4, 4))
 
 
 
