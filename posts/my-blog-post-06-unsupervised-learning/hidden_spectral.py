@@ -26,7 +26,7 @@ class spectral:
     def second_laplacian_eigenvector(self, A: np.array):
         self.D = np.diag(A.sum(axis = 0))
         # print(self.D)
-        self.L = np.multiply(np.linalg.inv(self.D), (self.D-A))
+        self.L = np.linalg.inv(self.D) @ (self.D-A)
         # print(self.L)
         evalue, evector = np.linalg.eig(self.L)
         # print("evalue")
