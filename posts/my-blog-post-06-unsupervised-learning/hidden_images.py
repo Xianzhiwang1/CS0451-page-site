@@ -7,6 +7,7 @@ np.random.seed(42)
 class svd:
     def __init__(self) -> None:
         self.sigma = None
+        self.svdSize = None
         
     def reconstruct(self, img: np.array, k: int):
         U, self.sigma, V = np.linalg.svd(img)
@@ -22,18 +23,23 @@ class svd:
             Sigma_ = Sigma[:k, :k]
             V_ = V[:k, :]
             A_ = U_ @ Sigma_ @ V_
+            U_size = U_.shape[0] * U_.shape[1]
+            V_size = V_.shape[0] * V_.shape[1]
+            Sigma_size = Sigma_.shape[0] * Sigma_.shape[1]
+            self.svdSize = U_size + V_size + Sigma_size
             return A_
 
 
 
     def experiment(self, img):
-        fig, axarr = plt.subplots(3, 2, figsize = (4, 4))
+        fig, axarr = plt.subplots(3, 2, figsize = (12, 12))
         n_pixel_img = (img.shape[0] * img.shape[1])
         i = 3 
         for ax in axarr.ravel():
             A_ = self.reconstruct(img, i)
-            n_pixel_A_ = (A_.shape[0] * A_.shape[1])
+            n_pixel_A_ = self.svdSize 
             storage = ( n_pixel_A_ / n_pixel_img ) * 100
+            storage = round(storage, 2)
             ax.imshow(A_, cmap = "Greys")
             ax.axis("off")
             ax.set(title = f"{i} components, storage = {storage} % ")
