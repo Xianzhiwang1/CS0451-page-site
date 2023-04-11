@@ -23,7 +23,7 @@ class spectral:
     def normcut(self, A, z):
         return self.cut(A, z) * (1/self.vol(0, A, z) + 1/self.vol(1, A, z))
 
-    def second_laplacian_eigenvector(self, A: np.array):
+    def second_laplacian_eigenvector(self, A: np.array) -> np.array:
         self.D = np.diag(A.sum(axis = 0))
         # print(self.D)
         self.L = np.linalg.inv(self.D) @ (self.D-A)
@@ -43,9 +43,15 @@ class spectral:
 
 
 
-    def spectral_clustering(self, G, n_neighbors = 6) -> np.array:
-
-        return None
+    def spectral_clustering(self, X, k = 6) -> np.array:
+        nbrs = NearestNeighbors(n_neighbors=k).fit(X)
+        A = nbrs.kneighbors_graph().toarray()
+        A = A + A.T
+        A[A > 1] = 1
+        z = self.second_laplacian_eigenvector(A)
+        # convert floats to 0s and 1s, so we just have two colors when we plot it.
+        z = 1 * (z>0)
+        return z 
 
 
 

@@ -122,10 +122,13 @@ class LinearRegression:
 
 
     def score(self, X_, y) -> float:
+        n_of_points = X_.shape[0]
         y_hat = self.y_hat(X_, self.w)
         y_bar = y.mean()
         quotient = ((y_hat - y)**2).sum() / ((y_bar - y)**2).sum()
-        return 1 - quotient 
+        result = (1- quotient)/n_of_points
+
+        return result 
 
 
     def pad(self, X):    
