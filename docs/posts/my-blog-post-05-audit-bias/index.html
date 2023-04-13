@@ -676,23 +676,20 @@ The Percentage of person who identify as white and is also employed is: 0.469027
 The Percentage of person who identify as other racial groups and is also employed is: 0.4030131826741996</code></pre>
 </div>
 </div>
-<div class="cell" data-execution_count="55">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>( df.groupby(<span class="st">"SEX"</span>).size() )</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"***"</span>)</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>( df.groupby(<span class="st">"group"</span>).size() )</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"***"</span>)</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>( df.groupby(<span class="st">"label"</span>).size() )</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"***"</span>)</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>( df.groupby([<span class="st">'group'</span>, <span class="st">'label'</span>]).size())</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"***"</span>)</span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"the average employment rate is: "</span> , df[<span class="st">"label"</span>].mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="70">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>( df.groupby(<span class="st">"SEX"</span>).size() )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>SEX
 1.0    26578
 2.0    27566
-dtype: int64
-***
-group
+dtype: int64</code></pre>
+</div>
+</div>
+<p>We observe that there are <span class="math inline">\(26578\)</span> males and <span class="math inline">\(27566\)</span> females in the data set. Using the <code>.groupby</code> function, we see that we can more efficiently obtain the information we needed than the methods demonstrated in the above cell blocks.</p>
+<div class="cell" data-execution_count="71">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>( df.groupby(<span class="st">"group"</span>).size() )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>group
 1    47332
 2     3626
 3       83
@@ -702,14 +699,25 @@ group
 7       17
 8      906
 9     1208
-dtype: int64
-***
-label
+dtype: int64</code></pre>
+</div>
+</div>
+<p>Since <code>group 1</code> denotes white individuals, and <code>group 2</code> denotes black individuals, we could read off of the previous block of code that there are <span class="math inline">\(47332\)</span> white individuals and <span class="math inline">\(3636\)</span> black individuals in Indiana in 2018.</p>
+<div class="cell" data-execution_count="72">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.groupby(<span class="st">"label"</span>).size())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>label
 False    29286
 True     24858
-dtype: int64
-***
-group  label
+dtype: int64</code></pre>
+</div>
+</div>
+<p>We see that in Indiana in 2018, there’s <span class="math inline">\(29286\)</span> persons who are unemployed, and there’s <span class="math inline">\(24858\)</span> persons who are employed. Again, using <code>.groupby</code> is much more efficient than what we did previously. The total number of persons in the data set is <span class="math inline">\(54144.\)</span> The (average) percentage of individuals who are employed is about <span class="math inline">\(46\)</span> percent.</p>
+<div class="cell" data-execution_count="74">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df.groupby([<span class="st">'group'</span>, <span class="st">'label'</span>]).size())</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"the average employment rate (of all people in all groups, in Indiana, in 2018) is: "</span> , df[<span class="st">"label"</span>].mean())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>group  label
 1      False    25132
        True     22200
 2      False     2252
@@ -728,13 +736,12 @@ group  label
 9      False      821
        True       387
 dtype: int64
-***
-the average employment rate is:  0.4591090425531915</code></pre>
+the average employment rate (of all people in all groups, in Indiana, in 2018) is:  0.4591090425531915</code></pre>
 </div>
 </div>
-<p>The following code is much more efficient, it shows the employment rate for each group. The employment rate for white people in IN in 2018 is <span class="math inline">\(47\)</span> percent. The employment for black people in IN in 2018 is <span class="math inline">\(37.9\)</span> percent.</p>
+<p>We see that in <code>group 1</code>, for white individuals in Indiana, in 2018, the number of unemployed individual is <span class="math inline">\(25132\)</span>, and the number of employed individual is <span class="math inline">\(22200\)</span>. Similarly, for black individuals in Indiana, in 2018, the number of unemployed individual is <span class="math inline">\(2252\)</span>, and the number of employed individual is <span class="math inline">\(1374\)</span>. However, it might be more clear to see the employment rate for better comparison. The following line of code shows the employment rate for each group. The employment rate for white individual in IN in 2018 is <span class="math inline">\(47\)</span> percent. The employment for black individual in IN in 2018 is <span class="math inline">\(37.9\)</span> percent. Hence, we see that the employment rate is higher for a white individual than a black individual statistically.</p>
 <div class="cell" data-execution_count="56">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>( df.groupby(<span class="st">"group"</span>)[<span class="st">"label"</span>].mean() )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>( df.groupby(<span class="st">"group"</span>)[<span class="st">"label"</span>].mean() )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>group
 1    0.469027
@@ -749,9 +756,9 @@ the average employment rate is:  0.4591090425531915</code></pre>
 Name: label, dtype: float64</code></pre>
 </div>
 </div>
-<p>More efficiently, we could use the following line of code and read off the numbers that for people identifying as white male, the employment rate is <span class="math inline">\(50.7\)</span> percent. For people identifying as white female, the employment rate is <span class="math inline">\(43.2\)</span> percent.</p>
+<p>More efficiently, we could use the following line of code and read off the employment rate for persons based on their race and gender binary. We see that for people identifying as white male, the employment rate is <span class="math inline">\(50.7\)</span> percent. For people identifying as white female, the employment rate is <span class="math inline">\(43.2\)</span> percent. Similarly, we see that for people identifying as black male, the employment rate is <span class="math inline">\(35.7\)</span> percent. For people identifying as black female, the employment rate is <span class="math inline">\(40\)</span> percent.</p>
 <div class="cell" data-execution_count="57">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df.groupby([<span class="st">"group"</span>,<span class="st">"SEX"</span>])[<span class="st">"label"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>df.groupby([<span class="st">"group"</span>,<span class="st">"SEX"</span>])[<span class="st">"label"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="57">
 <pre><code>group  SEX
 1      1.0    0.507493
@@ -774,72 +781,76 @@ Name: label, dtype: float64</code></pre>
 Name: label, dtype: float64</code></pre>
 </div>
 </div>
-<p>The below graph shows the number of female in each racial group and male in each racial group.</p>
+<p>The below graph shows the number of female in each racial group and male in each racial group for the PUMS data of Indiana in 2018. Recall that <code>group 1</code>, shown in blue here, denotes white individuals, and <code>group 2</code>, shown in orange here, denotes black individuals. The rest of the groups denotes several other racial groups, and the detailed encoding could be accessed on PUMS website. The main takaway here is that the population in Indiana in 2018 is predominantly white.</p>
 <div class="cell" data-execution_count="58">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> df.groupby([<span class="st">"group"</span>, <span class="st">"SEX"</span>]).size().reset_index(name <span class="op">=</span> <span class="st">"n"</span>)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>sns.barplot(data <span class="op">=</span> counts, x <span class="op">=</span> <span class="st">"SEX"</span>, y <span class="op">=</span> <span class="st">"n"</span>, hue <span class="op">=</span> <span class="st">"group"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>counts <span class="op">=</span> df.groupby([<span class="st">"group"</span>, <span class="st">"SEX"</span>]).size().reset_index(name <span class="op">=</span> <span class="st">"n"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>sns.barplot(data <span class="op">=</span> counts, x <span class="op">=</span> <span class="st">"SEX"</span>, y <span class="op">=</span> <span class="st">"n"</span>, hue <span class="op">=</span> <span class="st">"group"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="58">
 <pre><code>&lt;AxesSubplot:xlabel='SEX', ylabel='n'&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-20-output-2.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-23-output-2.png" class="img-fluid"></p>
 </div>
 </div>
+<p>In the following cell, we show a bar graph of average employment rate for individuals in different racial and gender binary categories. We should ignore <code>group 4</code>, since previously, as we are tallying the number of individuals in each racial group, we see that there is only one person in <code>group 4</code>, and that person is also recorded as employed, so <code>group 4</code> female has a employment rate of <span class="math inline">\(100\)</span> percent is because there’s only one person who is also employed.</p>
 <div class="cell" data-execution_count="59">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>percentages <span class="op">=</span> df.groupby([<span class="st">"group"</span>, <span class="st">"SEX"</span>])[<span class="st">"label"</span>].mean().reset_index()</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>sns.barplot(data <span class="op">=</span> percentages, x <span class="op">=</span> <span class="st">"SEX"</span>, y <span class="op">=</span> <span class="st">"label"</span>, hue <span class="op">=</span> <span class="st">"group"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>percentages <span class="op">=</span> df.groupby([<span class="st">"group"</span>, <span class="st">"SEX"</span>])[<span class="st">"label"</span>].mean().reset_index()</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>sns.barplot(data <span class="op">=</span> percentages, x <span class="op">=</span> <span class="st">"SEX"</span>, y <span class="op">=</span> <span class="st">"label"</span>, hue <span class="op">=</span> <span class="st">"group"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="59">
 <pre><code>&lt;AxesSubplot:xlabel='SEX', ylabel='label'&gt;</code></pre>
 </div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-21-output-2.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-24-output-2.png" class="img-fluid"></p>
 </div>
 </div>
-<p>The number of persons in the data set is <span class="math inline">\(54144.\)</span> The percentage of individuals who are employed is about <span class="math inline">\(46\)</span> percent.</p>
+</section>
+</section>
+<section id="moving-on-to-training-my-model" class="level1">
+<h1>Moving on to training my model</h1>
+<p>After consideration, we decide to go with logistic regression. We build our model, and we fit our model on our training data, which is stored in variable <code>X_train</code>, and <code>y_train</code>.</p>
 <div class="cell" data-execution_count="60">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co"># model = make_pipeline(StandardScaler(), LogisticRegression())</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LogisticRegression(solver<span class="op">=</span><span class="st">'liblinear'</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="co"># model = make_pipeline(StandardScaler(), LogisticRegression())</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LogisticRegression(solver<span class="op">=</span><span class="st">'liblinear'</span>, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>model.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="60">
 <style>#sk-container-id-2 {color: black;background-color: white;}#sk-container-id-2 pre{padding: 0;}#sk-container-id-2 div.sk-toggleable {background-color: white;}#sk-container-id-2 label.sk-toggleable__label {cursor: pointer;display: block;width: 100%;margin-bottom: 0;padding: 0.3em;box-sizing: border-box;text-align: center;}#sk-container-id-2 label.sk-toggleable__label-arrow:before {content: "▸";float: left;margin-right: 0.25em;color: #696969;}#sk-container-id-2 label.sk-toggleable__label-arrow:hover:before {color: black;}#sk-container-id-2 div.sk-estimator:hover label.sk-toggleable__label-arrow:before {color: black;}#sk-container-id-2 div.sk-toggleable__content {max-height: 0;max-width: 0;overflow: hidden;text-align: left;background-color: #f0f8ff;}#sk-container-id-2 div.sk-toggleable__content pre {margin: 0.2em;color: black;border-radius: 0.25em;background-color: #f0f8ff;}#sk-container-id-2 input.sk-toggleable__control:checked~div.sk-toggleable__content {max-height: 200px;max-width: 100%;overflow: auto;}#sk-container-id-2 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {content: "▾";}#sk-container-id-2 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-2 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-2 input.sk-hidden--visually {border: 0;clip: rect(1px 1px 1px 1px);clip: rect(1px, 1px, 1px, 1px);height: 1px;margin: -1px;overflow: hidden;padding: 0;position: absolute;width: 1px;}#sk-container-id-2 div.sk-estimator {font-family: monospace;background-color: #f0f8ff;border: 1px dotted black;border-radius: 0.25em;box-sizing: border-box;margin-bottom: 0.5em;}#sk-container-id-2 div.sk-estimator:hover {background-color: #d4ebff;}#sk-container-id-2 div.sk-parallel-item::after {content: "";width: 100%;border-bottom: 1px solid gray;flex-grow: 1;}#sk-container-id-2 div.sk-label:hover label.sk-toggleable__label {background-color: #d4ebff;}#sk-container-id-2 div.sk-serial::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: 0;}#sk-container-id-2 div.sk-serial {display: flex;flex-direction: column;align-items: center;background-color: white;padding-right: 0.2em;padding-left: 0.2em;position: relative;}#sk-container-id-2 div.sk-item {position: relative;z-index: 1;}#sk-container-id-2 div.sk-parallel {display: flex;align-items: stretch;justify-content: center;background-color: white;position: relative;}#sk-container-id-2 div.sk-item::before, #sk-container-id-2 div.sk-parallel-item::before {content: "";position: absolute;border-left: 1px solid gray;box-sizing: border-box;top: 0;bottom: 0;left: 50%;z-index: -1;}#sk-container-id-2 div.sk-parallel-item {display: flex;flex-direction: column;z-index: 1;position: relative;background-color: white;}#sk-container-id-2 div.sk-parallel-item:first-child::after {align-self: flex-end;width: 50%;}#sk-container-id-2 div.sk-parallel-item:last-child::after {align-self: flex-start;width: 50%;}#sk-container-id-2 div.sk-parallel-item:only-child::after {width: 0;}#sk-container-id-2 div.sk-dashed-wrapped {border: 1px dashed gray;margin: 0 0.4em 0.5em 0.4em;box-sizing: border-box;padding-bottom: 0.4em;background-color: white;}#sk-container-id-2 div.sk-label label {font-family: monospace;font-weight: bold;display: inline-block;line-height: 1.2em;}#sk-container-id-2 div.sk-label-container {text-align: center;}#sk-container-id-2 div.sk-container {/* jupyter's `normalize.less` sets `[hidden] { display: none; }` but bootstrap.min.css set `[hidden] { display: none !important; }` so we also need the `!important` here to be able to override the default hidden behavior on the sphinx rendered scikit-learn.org. See: https://github.com/scikit-learn/scikit-learn/issues/21755 */display: inline-block !important;position: relative;}#sk-container-id-2 div.sk-text-repr-fallback {display: none;}</style><div id="sk-container-id-2" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>LogisticRegression(random_state=0, solver='liblinear')</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item"><div class="sk-estimator sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-2" type="checkbox" checked=""><label for="sk-estimator-id-2" class="sk-toggleable__label sk-toggleable__label-arrow">LogisticRegression</label><div class="sk-toggleable__content"><pre>LogisticRegression(random_state=0, solver='liblinear')</pre></div></div></div></div></div>
 </div>
 </div>
 <div class="cell" data-execution_count="61">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> model.predict(X_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>y_hat <span class="op">=</span> model.predict(X_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="62">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f" The overall accuracy in predicting whether someone is employed in 2018 in Indiana is: </span><span class="sc">{</span>(y_hat <span class="op">==</span> y_test)<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>, <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>,</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f" The accuracy for white individuals is </span><span class="sc">{</span>(y_hat <span class="op">==</span> y_test)[group_test <span class="op">==</span> <span class="dv">1</span>]<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>, <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>, </span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f" The accuracy for black individuals is </span><span class="sc">{</span>(y_hat <span class="op">==</span> y_test)[group_test <span class="op">==</span> <span class="dv">2</span>]<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f" The overall accuracy in predicting whether someone is employed in 2018 in Indiana is: </span><span class="sc">{</span>(y_hat <span class="op">==</span> y_test)<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>, <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>,</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f" The accuracy for white individuals is </span><span class="sc">{</span>(y_hat <span class="op">==</span> y_test)[group_test <span class="op">==</span> <span class="dv">1</span>]<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>, <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>, </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f" The accuracy for black individuals is </span><span class="sc">{</span>(y_hat <span class="op">==</span> y_test)[group_test <span class="op">==</span> <span class="dv">2</span>]<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> The overall accuracy in predicting whether someone is employed in 2018 in Indiana is: 0.8331855791962175 
   The accuracy for white individuals is 0.8338424983027835 
   The accuracy for black individuals is 0.8265086206896551</code></pre>
 </div>
 </div>
-</section>
 <section id="train-my-model" class="level3">
 <h3 class="anchored" data-anchor-id="train-my-model">Train my model</h3>
 <div class="cell" data-execution_count="63">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>regress <span class="op">=</span> model.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>regress <span class="op">=</span> model.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell" data-execution_count="64">
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>regress.score(X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>regress.score(X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="64">
 <pre><code>0.8331855791962175</code></pre>
 </div>
 </div>
 <div class="cell" data-execution_count="65">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>model.score(X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>model.score(X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="65">
 <pre><code>0.8331855791962175</code></pre>
 </div>
 </div>
 <div class="cell" data-execution_count="66">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_test, y_hat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> classification_report</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(classification_report(y_test, y_hat))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>              precision    recall  f1-score   support
 
@@ -871,13 +882,13 @@ weighted avg       0.83      0.83      0.83     13536
 <li>Does your model satisfy statistical parity?</li>
 </ul>
 <div class="cell" data-execution_count="67">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> obj <span class="kw">in</span> [features, label, group]:</span>
-<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(obj.shape)</span>
-<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(features)</span>
-<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(group)</span>
-<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(label)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> obj <span class="kw">in</span> [features, label, group]:</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(obj.shape)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(features)</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(group)</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(label)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(67680, 16)
 (67680,)
@@ -896,36 +907,37 @@ weighted avg       0.83      0.83      0.83     13536
 <p>Recall that: * upper-left corner is <code>TN</code>, which stands for <code>True negative</code> * lower-left corner is <code>FN</code>, <code>False negative</code> * upper-right corner is <code>FP</code>, which stands for <code>False positive</code> * lower-right corner is <code>TP</code>, <code>True positive</code></p>
 <p>We also care about the <code>FPR</code>, which stands for the false positive rate, which is top-right corner of the confusion matrix (after we normalize). <code>FNR</code> is false negative rate.</p>
 <div class="cell" data-execution_count="68">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>my_matr <span class="op">=</span> confusion_matrix(y_test, model.predict(X_test))</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">4</span>,<span class="dv">4</span>))</span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>ax.imshow(my_matr)</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>ax.xaxis.<span class="bu">set</span>(ticks<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">1</span>), ticklabels<span class="op">=</span>(<span class="st">'Predicted False'</span>, <span class="st">'Predicted True'</span>))</span>
-<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>ax.yaxis.<span class="bu">set</span>(ticks<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">1</span>), ticklabels<span class="op">=</span>(<span class="st">'Actually False'</span>, <span class="st">'Actually True'</span>))</span>
-<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="fl">1.5</span>, <span class="op">-</span><span class="fl">0.5</span>)</span>
-<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
-<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
-<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>        ax.text(j,i, my_matr[i,j], ha<span class="op">=</span><span class="st">'center'</span>, va<span class="op">=</span><span class="st">'center'</span>, color<span class="op">=</span><span class="st">'black'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>my_matr <span class="op">=</span> confusion_matrix(y_test, model.predict(X_test))</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">4</span>,<span class="dv">4</span>))</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>ax.imshow(my_matr)</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>ax.xaxis.<span class="bu">set</span>(ticks<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">1</span>), ticklabels<span class="op">=</span>(<span class="st">'Predicted False'</span>, <span class="st">'Predicted True'</span>))</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>ax.yaxis.<span class="bu">set</span>(ticks<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">1</span>), ticklabels<span class="op">=</span>(<span class="st">'Actually False'</span>, <span class="st">'Actually True'</span>))</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="fl">1.5</span>, <span class="op">-</span><span class="fl">0.5</span>)</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>        ax.text(j,i, my_matr[i,j], ha<span class="op">=</span><span class="st">'center'</span>, va<span class="op">=</span><span class="st">'center'</span>, color<span class="op">=</span><span class="st">'black'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-30-output-1.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-33-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell" data-execution_count="69">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>my_matr <span class="op">=</span> confusion_matrix(y_test, model.predict(X_test), normalize<span class="op">=</span><span class="st">"true"</span>)</span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">4</span>,<span class="dv">4</span>))</span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>ax.imshow(my_matr)</span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>ax.xaxis.<span class="bu">set</span>(ticks<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">1</span>), ticklabels<span class="op">=</span>(<span class="st">'Predicted False'</span>, <span class="st">'Predicted True'</span>))</span>
-<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>ax.yaxis.<span class="bu">set</span>(ticks<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">1</span>), ticklabels<span class="op">=</span>(<span class="st">'Actually False'</span>, <span class="st">'Actually True'</span>))</span>
-<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="fl">1.5</span>, <span class="op">-</span><span class="fl">0.5</span>)</span>
-<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
-<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
-<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>        ax.text(j,i, my_matr[i,j].<span class="bu">round</span>(<span class="dv">4</span>), ha<span class="op">=</span><span class="st">'center'</span>, va<span class="op">=</span><span class="st">'center'</span>, color<span class="op">=</span><span class="st">'black'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="75">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>my_matr <span class="op">=</span> confusion_matrix(y_test, model.predict(X_test), normalize<span class="op">=</span><span class="st">"true"</span>)</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">4</span>,<span class="dv">4</span>))</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>ax.imshow(my_matr)</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>ax.xaxis.<span class="bu">set</span>(ticks<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">1</span>), ticklabels<span class="op">=</span>(<span class="st">'Predicted False'</span>, <span class="st">'Predicted True'</span>))</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>ax.yaxis.<span class="bu">set</span>(ticks<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">1</span>), ticklabels<span class="op">=</span>(<span class="st">'Actually False'</span>, <span class="st">'Actually True'</span>))</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="fl">1.5</span>, <span class="op">-</span><span class="fl">0.5</span>)</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>):</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>        ax.text(j,i, my_matr[i,j].<span class="bu">round</span>(<span class="dv">4</span>), ha<span class="op">=</span><span class="st">'center'</span>, va<span class="op">=</span><span class="st">'center'</span>, color<span class="op">=</span><span class="st">'black'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-31-output-1.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-34-output-1.png" class="img-fluid"></p>
 </div>
 </div>
+<p>The positive predictive value (PPV) is obtained by using this formula: <span class="math display">\[PPV = \frac{TP}{TP+FP},\]</span> where <span class="math inline">\(TP\)</span> denotes True Positive, and <span class="math inline">\(FP\)</span> denotes True Negative. Hence, we need the value from lower-right corner (TP) of the confusion matrix divided by the value from lower right corner (TP) plus upper-right corner (FP).</p>
 </section>
 <section id="concluding-discussion" class="level3">
 <h3 class="anchored" data-anchor-id="concluding-discussion">Concluding Discussion</h3>
