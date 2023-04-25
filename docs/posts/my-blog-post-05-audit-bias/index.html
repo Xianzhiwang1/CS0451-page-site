@@ -833,9 +833,11 @@ Name: label, dtype: float64</code></pre>
 </div>
 <section id="train-my-model" class="level3">
 <h3 class="anchored" data-anchor-id="train-my-model">Train my model</h3>
+<p>First let us fit our model.</p>
 <div class="cell" data-execution_count="63">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>regress <span class="op">=</span> model.fit(X_train, y_train)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Now we score our model on the test sets, and we could read off the overall test score as <span class="math inline">\(0.833\)</span>.</p>
 <div class="cell" data-execution_count="64">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>regress.score(X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="64">
