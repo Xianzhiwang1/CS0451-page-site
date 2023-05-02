@@ -225,219 +225,279 @@ background-size: cover;
 </section>
 <section id="introduction." class="level1">
 <h1>Introduction.</h1>
-<p>In this blog post I am going to discuss kernel logistic regression for binary classification.</p>
-<p>Recall the empirical risk minimization problem, which is finding the weight vector <code>w</code> that minimize the loss function <span class="math inline">\(L(w)\)</span>. #### <span class="math display">\[ \hat{w} = \arg \min_{w} L(w), \]</span> where the loss function <span class="math inline">\(L(w)\)</span> is of the following form: #### <span class="math display">\[ L(w) = \frac{1}{n} \sum_{i=1}{n} \ell( \langle w, x_i \rangle, y_i ), \]</span> and $(, y ) $ is the logistic loss from the previous blog post. However, previously, we only studied <em>linear decision boundaries</em>, and now we want to study nonlinear patterns.</p>
+<p>In this blog post I am going to discuss kernel logistic regression for binary classification. Recall that in previous blog posts, the visualization of the data set with <span class="math inline">\(2\)</span> features looks graphically like it could be reasonably separated by a line. With more features, we could no longer visualize in <span class="math inline">\(2\)</span> dimension, but the idea is the same, we use linear separation, like a hyperplane. However, what if the data is dominated by other patterns that are not suitable for a straight line (or a straight plane if you will) separation? Hence, we need to use some other methods, and hence let us use kernel logistic regression.</p>
+<p>Recall the empirical risk minimization problem in previous blog posts, which is finding the weight vector <code>w</code> that minimize the loss function <span class="math inline">\(L(w)\)</span>. <span class="math display">\[ \hat{w} = \arg \min_{w} L(w), \]</span> where the loss function <span class="math inline">\(L(w)\)</span> is of the following form: <span class="math display">\[ L(w) = \frac{1}{n} \sum_{i=1}^{n} \ell( \langle w, x_i \rangle, y_i ), \]</span> and $(, y ) $ is the logistic loss from the previous blog post. However, previously, we only studied <em>linear decision boundaries</em>, and now we want to study nonlinear patterns. Hence, instead of feature vector <span class="math inline">\(x_i\)</span>, we need modified feature vector <span class="math inline">\(\kappa(x_i)\)</span> that does the following: <span class="math display">\[
+\kappa(x_i) =
+\begin{bmatrix}
+&amp;k(x_1, x_i)\\
+&amp;k(x_2, x_i)\\
+&amp;\vdots\\
+&amp;k(x_n, x_i)\\
+\end{bmatrix}
+\]</span> where <span class="math inline">\(k: \mathbb{R}^2 \rightarrow \mathbb{R}\)</span> is called a <em>kernel function</em>. Hence our empirical risk function (loss function) is now <span class="math display">\[ L_k(w) = \frac{1}{n} \sum_{i=1}^{n} \ell( \langle w, \kappa(x_i) \rangle, y_i ), \]</span> where the subscript <span class="math inline">\(k\)</span> in <span class="math inline">\(L_k(w)\)</span> indicates we are using a kernel function <span class="math inline">\(k\)</span>.</p>
 <div class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext autoreload</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>autoreload <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>First, let’s import some libraries, and let’s create an artificial data set that has nonlinear patterns.</p>
-<div class="cell" data-execution_count="2">
+<div class="cell" data-execution_count="163">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># from sklearn.datasets import make_blobs</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_moons, make_circles</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_moons, make_circles, make_blobs, make_biclusters, make_classification</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">4</span>,<span class="dv">4</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mlxtend.plotting <span class="im">import</span> plot_decision_regions</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>np.seterr(<span class="bu">all</span><span class="op">=</span><span class="st">"ignore"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>{'divide': 'warn', 'over': 'warn', 'under': 'ignore', 'invalid': 'warn'}</code></pre>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">6</span>,<span class="dv">3</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'figure.dpi'</span>] <span class="op">=</span> <span class="dv">117</span> </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'savefig.dpi'</span>] <span class="op">=</span> <span class="dv">78</span> </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mlxtend.plotting <span class="im">import</span> plot_decision_regions</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>np.seterr(<span class="bu">all</span><span class="op">=</span><span class="st">"ignore"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="163">
+<pre><code>{'divide': 'ignore', 'over': 'ignore', 'under': 'ignore', 'invalid': 'ignore'}</code></pre>
 </div>
 </div>
-<p>How to deal with the nonlinear pattern we see here? it seems a linear separator like a straight line will not do a satisfactory job here. Hence, we introduce the <em>kernel logistic regression</em>, which we are going to implement now.</p>
-<div class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> make_moons(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.1</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>], c <span class="op">=</span> y)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># LR = LogisticRegression()</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># LR.fit(X, y)</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_decision_regions(X, y, clf = LR)</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># title = plt.gca().set(title = f"Accuracy = {(LR.predict(X) == y).mean()}",</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#                       xlabel = "Feature 1", </span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#                       ylabel = "Feature 2")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>First, we use <code>make_moons</code> from <code>sklearn.datasets</code> to generate some artificial data. How to deal with the nonlinear pattern we see in the plot below (graph on the left)? it seems a linear separator like a straight line will not do a satisfactory job here. Hence, we need <em>kernel logistic regression</em>, which we implemented in <code>kernel_logistic.py</code>, and we are going to import it into this notebook.</p>
+<div class="cell" data-execution_count="164">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics.pairwise <span class="im">import</span> rbf_kernel</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kernel_logistic <span class="im">import</span> KLR </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>X_moon, y_moon <span class="op">=</span> make_moons(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>After seeing this data set below, we would guess that a linear classification would not do a great job at classifying the patterns we see here with our eyes. Hence, without further ado, let’s see how our <code>KLR</code>, kernel logistic regression handle this binary classification problem. Let’s choose a <code>gamma = 1.8</code> and fit our model.</p>
+<div class="cell" data-execution_count="165">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kernel_logistic <span class="im">import</span> KLR </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>KLR5 <span class="op">=</span> KLR(rbf_kernel, gamma <span class="op">=</span> <span class="fl">1.8</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>KLR5.fit(X_moon, y_moon)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="167">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>KLR5.my_plot(X_moon, y_moon, <span class="st">"make_moons"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-4-output-1.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<section id="try-on-a-tiny-example" class="level2">
-<h2 class="anchored" data-anchor-id="try-on-a-tiny-example">Try on a tiny example</h2>
-<p>To start us off, we manually create a tiny data set, and we call the <code>fit</code> function that we implemented in the source code (link at the start of the blog). This will help us to see clearly where our implementation works or not, and using a tiny test data set also helps for debugging purposes.</p>
-<div class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>XX <span class="op">=</span> np.array([</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>[<span class="op">-</span><span class="fl">50.84739307</span>, <span class="fl">50.71154296</span>],</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a> [ <span class="fl">11.46814927</span>, <span class="op">-</span><span class="fl">9.28580296</span>],</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a> [ <span class="op">-</span><span class="fl">40.5192833</span>,   <span class="op">-</span><span class="fl">70.94984582</span>],</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a> [ <span class="fl">10.73327397</span>,  <span class="fl">10.17310931</span>],</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a> [ <span class="fl">10.33197143</span>,  <span class="fl">0.43375035</span>],</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a> [ <span class="op">-</span><span class="fl">1.62726102</span>, <span class="op">-</span><span class="fl">0.54736954</span>],</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>[<span class="op">-</span><span class="fl">7.84739307</span>, <span class="fl">5.71154296</span>],</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a> [ <span class="op">-</span><span class="fl">21.46814927</span>, <span class="op">-</span><span class="fl">19.28580296</span>],</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a> [ <span class="op">-</span><span class="fl">10.5192833</span>,   <span class="op">-</span><span class="fl">50.94984582</span>],</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a> [ <span class="fl">7.73327397</span>,  <span class="fl">0.17310931</span>],</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>])</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>yy <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>])</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(yy)</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>plt.scatter(XX[:,<span class="dv">0</span>], XX[:,<span class="dv">1</span>], c <span class="op">=</span> yy)</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1 1 0 0 0 0 1 0 1 1]</code></pre>
+<p>We see that we achieved a training score of <span class="math inline">\(0.985\)</span>. Not bad at all! Also, just looking at the graph on the right, we see that the decision boundary looks spot on, and we could tell it is a good classification by just looking at it. The blue squares land correctly in the blue region, and the orange triangles land correctly in the orange region. Still, let’s create a fresh synthetic data that our Kernel Logistic Regression has not seen before, and test it on that.</p>
+<div class="cell" data-execution_count="168">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>X_moon2, y_moon2 <span class="op">=</span> make_moons(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-5-output-2.png" class="img-fluid"></p>
-</div>
-</div>
-<p>It seems that those <span class="math inline">\(10\)</span> data points does not display a linear pattern, which is what we want. Now we create an instance of the <code>KLR</code> class and test our <code>fit</code> function to see if it could classify according to nonlinear patterns.</p>
-<div class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics.pairwise <span class="im">import</span> rbf_kernel</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kernel_logistic <span class="im">import</span> KLR </span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>KLR <span class="op">=</span> KLR(rbf_kernel )</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>KLR.fit(XX, yy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(XX)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[[-50.84739307  50.71154296]
- [ 11.46814927  -9.28580296]
- [-40.5192833  -70.94984582]
- [ 10.73327397  10.17310931]
- [ 10.33197143   0.43375035]
- [ -1.62726102  -0.54736954]
- [ -7.84739307   5.71154296]
- [-21.46814927 -19.28580296]
- [-10.5192833  -50.94984582]
- [  7.73327397   0.17310931]]</code></pre>
-</div>
-</div>
-<div class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(XX, yy, clf <span class="op">=</span> KLR)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>mypredict <span class="op">=</span> KLR.predict(XX)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>title <span class="op">=</span> plt.gca().<span class="bu">set</span>(title <span class="op">=</span> <span class="ss">f"Accuracy = </span><span class="sc">{</span>(mypredict <span class="op">==</span> yy)<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                      xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, </span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                      ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Below, we see a testing score of <span class="math inline">\(0.935\)</span>, which is not bad at all considering our model has not seen this perticular synthetic data before!</p>
+<div class="cell" data-execution_count="169">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>KLR5.my_plot(X_moon2, y_moon2, <span class="st">"make_moons"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-8-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(KLR.predict(XX))</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(yy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1 1 0 0 0 0 1 0 1 1]
-[1 1 0 0 0 0 1 0 1 1]</code></pre>
-</div>
-</div>
+<p>Not bad at all! We see that <code>KLR</code> did a decent job fitting the non-linear decision boundary, and achieved an accuracy score above <span class="math inline">\(0.9\)</span>. The data is quite neatly separated by this curvy decision boundary our <code>KLR</code> generated. Now, let’s explore the parameter <code>gamma</code> and also experiment with data that has different amount of noise in it.</p>
 </section>
-<section id="try-on-a-bigger-example" class="level2">
-<h2 class="anchored" data-anchor-id="try-on-a-bigger-example">Try on a bigger example</h2>
-<div class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>np.seterr(<span class="bu">all</span><span class="op">=</span><span class="st">"ignore"</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mlxtend.plotting <span class="im">import</span> plot_decision_regions</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> make_moons(<span class="dv">80</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.3</span>)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>plt.scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>], c <span class="op">=</span> y)</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>KLR.fit(X, y)</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(X, y, clf <span class="op">=</span> KLR)</span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>yourpredict <span class="op">=</span> KLR.predict(X)</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>title <span class="op">=</span> plt.gca().<span class="bu">set</span>(title <span class="op">=</span> <span class="ss">f"Accuracy = </span><span class="sc">{</span>(yourpredict <span class="op">==</span> y)<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>,</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>                      xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, </span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>                      ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(KLR.predict(X))</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"OMG"</span>)</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[0 0 0 0 0 0 1 1 0 0 1 0 1 0 1 1 1 1 1 1 1 1 0 1 0 1 0 1 0 1 0 1 0 1 1 0 1
- 0 1 1 1 0 0 0 1 1 0 0 1 1 1 1 0 0 1 0 1 0 1 1 1 1 0 1 0 0 1 0 0 0 1 0 0 0
- 1 0 0 1 0 0]
-OMG
-[0 0 0 0 0 0 0 1 0 0 1 0 1 0 1 1 1 1 1 1 0 1 0 1 0 1 1 1 0 0 1 1 0 1 1 0 1
- 0 1 0 1 0 0 0 0 1 0 0 1 1 1 1 0 0 1 0 1 0 1 1 1 0 0 1 1 1 1 0 0 0 1 0 0 0
- 1 0 1 1 0 1]</code></pre>
-</div>
+<section id="choosing-gamma-and-try-on-a-tiny-example" class="level1">
+<h1>Choosing <code>gamma</code> and Try on a tiny example</h1>
+<p>To start us off, we manually create a tiny data set, and we call the <code>fit</code> function that we implemented in the source code (link at the start of the blog). We start with a big value for gamma: <code>gamma = 100</code>, and in this tiny data set, we could see clearly what’s going on with the decision boundary, and a tiny data set could also help with debugging purposes.</p>
+<div class="cell" data-execution_count="161">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>XX <span class="op">=</span> np.array([</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>[<span class="op">-</span><span class="fl">40.84739307</span>, <span class="fl">30.71154296</span>],</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a> [ <span class="fl">11.46814927</span>, <span class="op">-</span><span class="fl">9.28580296</span>],</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a> [ <span class="op">-</span><span class="fl">40.5192833</span>,   <span class="op">-</span><span class="fl">70.94984582</span>],</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a> [ <span class="fl">10.73327397</span>,  <span class="fl">10.17310931</span>],</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a> [ <span class="fl">10.33197143</span>,  <span class="fl">0.43375035</span>],</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a> [ <span class="op">-</span><span class="fl">1.62726102</span>, <span class="op">-</span><span class="fl">0.54736954</span>],</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>[<span class="op">-</span><span class="fl">7.84739307</span>, <span class="fl">5.71154296</span>],</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a> [ <span class="op">-</span><span class="fl">21.46814927</span>, <span class="op">-</span><span class="fl">19.28580296</span>],</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a> [ <span class="op">-</span><span class="fl">10.5192833</span>,   <span class="op">-</span><span class="fl">50.94984582</span>],</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a> [ <span class="fl">7.73327397</span>,  <span class="fl">0.17310931</span>],</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>yy <span class="op">=</span> np.array([<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>])</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">3</span>,<span class="dv">3</span>)</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>plt.scatter(XX[:,<span class="dv">0</span>], XX[:,<span class="dv">1</span>], c <span class="op">=</span> yy)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-11-output-2.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-9-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<div class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(KLR.v)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>It seems that those <span class="math inline">\(10\)</span> data points does not display a linear pattern, which is what we want. Now we create an instance of the <code>KLR</code> class with <code>gamma = 100</code> and test our <code>fit</code> function to see if it could classify these <span class="math inline">\(10\)</span> points with <span class="math inline">\(100 \%\)</span> accuracy.</p>
+<div class="cell" data-execution_count="47">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kernel_logistic <span class="im">import</span> KLR </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>KLR <span class="op">=</span> KLR(rbf_kernel, gamma <span class="op">=</span> <span class="dv">100</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>KLR.fit(XX, yy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We see that our classifier makes a little circular boundary around each orange triangular data points, while the rest of the region is all classified as blue for the blue squares. <code>gamma</code> essentially controls how “wiggly” our decision boundary is allowed to be. If <code>gamma</code> is small, our decision boundary would be less curvy, and if <code>gamma</code> is too big, we tend to overfit and produce the picture below.</p>
+<div class="cell" data-execution_count="48">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(XX, yy, clf <span class="op">=</span> KLR)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>mypredict <span class="op">=</span> KLR.predict(XX)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>title <span class="op">=</span> plt.gca().<span class="bu">set</span>(title <span class="op">=</span> <span class="ss">f"Accuracy = </span><span class="sc">{</span>(mypredict <span class="op">==</span> yy)<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                      xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                      ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Also, we do achieve <span class="math inline">\(100\%\)</span> accuracy here, since our accuracy is <span class="math inline">\(1.0\)</span>. But if you insist on pop open the hood and inspect what’s underneath, let’s print out the actual label <code>yy</code> and our predicted labels, and see that they are indeed the same.</p>
+<div class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Actual labels: </span><span class="sc">{</span>yy<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Predicted labels: </span><span class="sc">{</span>KLR<span class="sc">.</span>predict(XX)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[-1179.96550569 -2790.28343168 -1350.34402312 -1016.12721979
-  1317.09792385 -1810.11426626  2546.49702776 -1698.14631029
- -1811.95450782   -44.84604051 -1875.0500244  -2414.73171276
-   -83.16865128  2737.37445494  -511.39291408  -172.10314639
-  1841.53416798  -289.68517734   278.73676319  2314.88794609
-  2308.33636841 -2010.14390628    52.42682597  -197.05415376
- -1082.98594611 -2013.7726828  -1497.96098375   914.94570061
-  1977.66154624 -1608.7151421  -2103.83992013  -932.57756199
- -7436.76036863 -2198.75261428  2026.86616783  -111.48818587
-   688.7887425    655.92511244  2896.7561339   2584.46281901
-  3653.83460661   -25.48845316   748.56648432   411.28381018
-  1839.04630941  1188.73342418 -1059.77106821  2617.22188799
-  2692.81087034  5302.19223408 -1199.64601213  1180.74030999
-  2375.01140945  -912.06492168  2152.82530682 -3287.86563739
- -1511.48609759  1701.60310544   890.20852102 -6049.43487866
-   919.50031634  2040.3175221  -1453.43703857  2059.97544263
- -2653.45287258  -448.11834792  1556.05840695  1715.29365951
- -2402.68814431 -1838.28676088  3978.58062434  -848.76206469
- -3127.12581133   285.4039421    536.22820077  1495.01840979
- -3051.0533366   4639.95344253  1529.93340297 -2551.4328797 ]</code></pre>
+<pre><code>Actual labels: [1 1 1 1 1 0 0 0 0 0]
+Predicted labels: [1 1 1 1 1 0 0 0 0 0]</code></pre>
 </div>
 </div>
+<p>Now, with the same tiny data set, we use a very small gamma and see how the decision boundary would look like. Hence, let <code>gamma = 0.05</code>.</p>
+<div class="cell" data-execution_count="50">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kernel_logistic <span class="im">import</span> KLR </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>KLR <span class="op">=</span> KLR(rbf_kernel, gamma <span class="op">=</span> <span class="fl">0.05</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>KLR.fit(XX, yy)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(XX, yy, clf <span class="op">=</span> KLR)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>mypredict <span class="op">=</span> KLR.predict(XX)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>title <span class="op">=</span> plt.gca().<span class="bu">set</span>(title <span class="op">=</span> <span class="ss">f"Accuracy = </span><span class="sc">{</span>(mypredict <span class="op">==</span> yy)<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                      xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>                      ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-13-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>we see that our decision boundary is less “smooth” and looks more “jagged”, so choosing a good <code>gamma</code> would decide the right complexity for our decision boundary, hence the parameter <code>gamma</code> is quite important to this binary classification problem.</p>
 </section>
-<section id="lets-try-a-different-data-set" class="level2">
-<h2 class="anchored" data-anchor-id="lets-try-a-different-data-set">Let’s try a different data set</h2>
-<div class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> make_moons(<span class="dv">80</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.1</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>plt.scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>], c <span class="op">=</span> y)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>KLR.fit(X, y)</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># plot the graph</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>plt.scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>], c <span class="op">=</span> y)</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>labels <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(X, y, clf <span class="op">=</span> KLR)</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>yourpredict <span class="op">=</span> KLR.predict(X)</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>title <span class="op">=</span> plt.gca().<span class="bu">set</span>(title <span class="op">=</span> <span class="ss">f"Accuracy = </span><span class="sc">{</span>(yourpredict <span class="op">==</span> y)<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>,</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>                      xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, </span>
-<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>                      ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span>
-<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(KLR.predict(X))</span>
-<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"OMG"</span>)</span>
-<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[0 0 1 1 1 0 1 0 1 1 1 0 0 1 0 1 1 1 1 0 0 1 0 1 0 1 1 0 1 0 0 1 0 0 1 1 1
- 1 1 1 1 0 0 1 1 0 0 1 0 0 1 0 1 0 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 0 1 0 1 0
- 1 0 0 1 0 0]
-OMG
-[0 0 1 1 1 0 1 0 1 1 1 0 0 1 0 1 1 1 1 0 0 1 0 1 0 1 1 0 1 0 0 1 0 1 1 1 1
- 0 1 1 1 0 0 1 1 0 1 1 0 0 1 0 1 0 0 0 0 0 1 0 1 1 1 0 1 0 0 0 0 0 1 0 1 0
- 1 0 0 1 0 0]</code></pre>
+<section id="choosing-different-noise-level-and-try-on-a-synthetic-data-set-with-make_circles" class="level1">
+<h1>Choosing different noise level and Try on a synthetic data set with <code>make_circles</code></h1>
+<p>This time, we set the size of the data set to contain <span class="math inline">\(200\)</span> data points, and we call <code>mak_circle</code> to generate our data. We set <code>noise = 0.8</code>, so our data set is very noisy, and in the visualization below (the plot on the right), we see that we cannot really distinguish the circles by eye, so the data set is indeed very noisy and chaotic.</p>
+<div class="cell" data-execution_count="170">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>X_cir, y_cir <span class="op">=</span> make_circles(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Let’s set <code>gamma = 1.8</code> and train our model by calling the <code>.fit()</code> function.</p>
+<div class="cell" data-execution_count="171">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kernel_logistic <span class="im">import</span> KLR </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>KLR6 <span class="op">=</span> KLR(rbf_kernel, gamma <span class="op">=</span> <span class="fl">1.8</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>KLR6.fit(X_cir, y_cir)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Below, in the plot on the left, we see that with very noisy data, our Kernel Logistic Regression only scored <span class="math inline">\(0.63\)</span> in accuracy, and judging by looking at the picture, we feel that our classifier only did a slightly above average job at classifying the data points. Hence, noisy data does negatively affect the performace of our Kernel Logistic Regression.</p>
+<div class="cell" data-execution_count="172">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">8</span>,<span class="dv">4</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>KLR6.my_plot(X_cir, y_cir, <span class="st">"make_circles"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-13-output-2.png" class="img-fluid"></p>
+<p><img src="index_files/figure-html/cell-16-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Still, let’s test our trained model on a fresh copy of synthetic data generated using <code>make_circles</code>. This time, the testing accuracy is only <span class="math inline">\(0.435\)</span>, which is less than <span class="math inline">\(0.5\)</span>. Hence, we might be better off just guess randomly instead of applying our training model in this case!</p>
+<div class="cell" data-execution_count="173">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>X_cir2, y_cir2 <span class="op">=</span> make_circles(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.8</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>KLR6.my_plot(X_cir2, y_cir2, <span class="st">"make_circles"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-17-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now, we try with a data set with very little noise by setting <code>noise = 0.05</code>, and let the rest of the parameter stay the same. Hence, we keep <code>gamma = 1.8</code>, number of data points <span class="math inline">\(200\)</span>, etc.</p>
+<div class="cell" data-execution_count="100">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>X_cir3, y_cir3 <span class="op">=</span> make_circles(<span class="dv">200</span>, shuffle <span class="op">=</span> <span class="va">True</span>, noise <span class="op">=</span> <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="101">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kernel_logistic <span class="im">import</span> KLR </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>KLR2 <span class="op">=</span> KLR(rbf_kernel, gamma <span class="op">=</span> <span class="fl">1.8</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>KLR2.fit(X_cir3, y_cir3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="107">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">2</span>)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].scatter(X_cir3[:,<span class="dv">0</span>], X_cir3[:,<span class="dv">1</span>], c <span class="op">=</span> y_cir3)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>, title <span class="op">=</span> <span class="st">"artificial data created by make_circles"</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].plot()</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(X_cir3, y_cir3, clf <span class="op">=</span> KLR2)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>yourpredict <span class="op">=</span> KLR2.predict(X_cir3)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].<span class="bu">set</span>(title <span class="op">=</span> <span class="ss">f"Accuracy = </span><span class="sc">{</span>(yourpredict <span class="op">==</span> y_cir3)<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>                      xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, </span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>                      ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-20-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>This time, since our data has pretty clear patterns, and has very little noise, our Kernel Logistic Regression did a great job at classifying the data points and engineering the decision boundary. We see that decision region plot on the right looks spot on, and the accuracy score is around <span class="math inline">\(0.95\)</span>, which is pretty high compared to the score we had before when the data was noisy.</p>
+</section>
+<section id="try-other-problem-geometries" class="level1">
+<h1>Try other problem geometries</h1>
+<p>let’s start with a data set generated by <code>make_blobs</code> function, with a reasonable amount of standard deviations (which is a proxy for noise in this case) in it.</p>
+<div class="cell" data-execution_count="175">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> make_blobs(n_samples <span class="op">=</span> <span class="dv">200</span>, centers <span class="op">=</span> <span class="dv">2</span>, n_features <span class="op">=</span> <span class="dv">2</span>, cluster_std<span class="op">=</span><span class="dv">3</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let us set <code>gamma = 2.45</code> and see how well we do in this case.</p>
+<div class="cell" data-execution_count="176">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kernel_logistic <span class="im">import</span> KLR</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>KLR3 <span class="op">=</span> KLR(rbf_kernel, gamma <span class="op">=</span> <span class="fl">2.45</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>KLR3.fit(X, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="179">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">8</span>,<span class="dv">4</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>KLR3.my_plot(X,y, <span class="st">"make_blobs"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-23-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>We see that we achieved a very high accuracy score of <span class="math inline">\(0.995\)</span>. We could also call the <code>.predict()</code> function to find out the predicted value and compare that to the actual value of <code>y</code>, and see that they indeed match up.</p>
+<div class="cell" data-execution_count="178">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Actual labels: </span><span class="sc">{</span>y<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Predicted labels: </span><span class="sc">{</span>KLR3<span class="sc">.</span>predict(X)<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Actual labels: [1 1 1 0 1 1 1 1 0 1 0 1 0 1 1 0 1 1 1 1 1 1 0 1 0 0 1 0 1 0 0 1 0 0 0 1 0
+ 1 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 0 1 0 0 1 1 1 1 1 0 1 0 0 1 0 0 1 0 0 0
+ 1 0 0 1 0 0 1 1 1 1 1 1 0 1 1 1 0 0 0 0 1 0 0 1 0 1 1 0 1 0 0 1 1 1 1 0 1
+ 0 1 0 1 1 0 0 0 1 0 1 1 0 0 1 0 0 0 1 0 1 1 0 1 1 0 1 1 0 1 0 0 0 0 1 1 1
+ 0 1 0 1 1 1 1 0 0 0 0 0 0 1 0 1 0 0 1 1 1 0 1 1 0 1 0 0 0 1 0 1 1 1 0 0 0
+ 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0]
+Predicted labels: [1 1 1 0 1 1 1 1 0 1 0 1 0 1 1 0 1 1 1 1 1 1 1 1 0 0 1 0 1 0 0 1 0 0 0 1 0
+ 1 0 1 0 1 1 1 0 1 0 0 0 1 1 0 0 0 0 1 0 0 1 1 1 1 1 0 1 0 0 1 0 0 1 0 0 0
+ 1 0 0 1 0 0 1 1 1 1 1 1 0 1 1 1 0 0 0 0 1 0 0 1 0 1 1 0 1 0 0 1 1 1 1 0 1
+ 0 1 0 1 1 0 0 0 1 0 1 1 0 0 1 0 0 0 1 0 1 1 0 1 1 0 1 1 0 1 0 0 0 0 1 1 1
+ 0 1 0 1 1 1 1 0 0 0 0 0 0 1 0 1 0 0 1 1 1 0 1 1 0 1 0 0 0 1 0 1 1 1 0 0 0
+ 0 0 0 1 0 1 0 0 1 0 0 1 0 1 0]</code></pre>
+</div>
+</div>
+<p>In the next example, we use <code>make_classification</code> to make some sythetic data with <span class="math inline">\(4\)</span> features. Since we have more than <span class="math inline">\(2\)</span> features, we could only plot <span class="math inline">\(2\)</span> dimensions at a time to visualize how our classification performs. Let’s generate the data set first.</p>
+<div class="cell" data-execution_count="137">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>X_class, y_class <span class="op">=</span> make_classification(n_samples <span class="op">=</span> <span class="dv">200</span>, </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                           n_classes <span class="op">=</span> <span class="dv">2</span>, </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                           n_redundant<span class="op">=</span> <span class="dv">0</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>                           n_informative<span class="op">=</span> <span class="dv">2</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>                           n_features <span class="op">=</span> <span class="dv">4</span>, </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>                           n_clusters_per_class <span class="op">=</span> <span class="dv">1</span>, </span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>                           class_sep <span class="op">=</span> <span class="fl">1.5</span>,</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>                           random_state<span class="op">=</span><span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we set <code>gamma = 2.45</code> and we train our Kernel Logistic Regression on this data set.</p>
+<div class="cell" data-execution_count="134">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> kernel_logistic <span class="im">import</span> KLR</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>KLR4 <span class="op">=</span> KLR(rbf_kernel, gamma <span class="op">=</span> <span class="fl">2.45</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>KLR4.fit(X_class, y_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, we call our costom function <code>.myprint()</code> that generate the plots for us that only focuses on the first <span class="math inline">\(2\)</span> dimensions, since we can only plot <span class="math inline">\(2\)</span> dimension at a time in 2D.</p>
+<div class="cell" data-execution_count="157">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">6</span>,<span class="dv">3</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>value <span class="op">=</span> <span class="dv">1</span> </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>width <span class="op">=</span> <span class="dv">1</span> </span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>KLR4.myprint(X_class, y_class, <span class="st">"make_classification"</span>, value, width)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-27-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now, let’s also take a peak at how our Kernel Logistic Regression is doing in dimension <span class="math inline">\(3\)</span> and <span class="math inline">\(4\)</span>. We see that the decision boundary looks pretty good! Notice that feature is labeled 0, 1, 2, 3, so we are looking at feature 2 and 3 here!</p>
+<div class="cell" data-execution_count="158">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">3</span>,<span class="dv">3</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>plot_decision_regions(X_class, y_class, clf <span class="op">=</span> KLR4, </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>                    feature_index<span class="op">=</span>[<span class="dv">2</span>,<span class="dv">3</span>],</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>                    filler_feature_values<span class="op">=</span>{<span class="dv">0</span>: value, <span class="dv">1</span>: value},</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>                    filler_feature_ranges<span class="op">=</span>{<span class="dv">0</span>: width, <span class="dv">1</span>: width})</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>yourpredict <span class="op">=</span> KLR4.predict(X_class)</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>title <span class="op">=</span> plt.gca().<span class="bu">set</span>(title <span class="op">=</span> <span class="ss">f"Accuracy = </span><span class="sc">{</span>(yourpredict <span class="op">==</span> y_class)<span class="sc">.</span>mean()<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>                xlabel <span class="op">=</span> <span class="st">"Feature 2"</span>, </span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>                ylabel <span class="op">=</span> <span class="st">"Feature 3"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-28-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

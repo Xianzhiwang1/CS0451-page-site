@@ -154,6 +154,19 @@ class KLR:
 
         plt.tight_layout()
 
+    def my_plot(self, X_cir, y_cir, plot_function) -> None:
+        fig, axarr = plt.subplots(1,2)
+        axarr[0].scatter(X_cir[:,0], X_cir[:,1], c = y_cir)
+        axarr[0].set(xlabel = "Feature 1", ylabel = "Feature 2", title = f"artificial data created by {plot_function}")
+
+        axarr[1].plot()
+        plot_decision_regions(X_cir, y_cir, clf = self)
+        yourpredict = self.predict(X_cir)
+        axarr[1].set(title = f"Accuracy = {(yourpredict == y_cir).mean()}",
+                            xlabel = "Feature 1", 
+                            ylabel = "Feature 2")
+        plt.tight_layout()
+
 
         
 
