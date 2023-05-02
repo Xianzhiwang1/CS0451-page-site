@@ -3,8 +3,8 @@ from typing import TypeVar
 from sklearn.linear_model import LogisticRegression
 from mlxtend.plotting import plot_decision_regions
 from scipy.optimize import minimize
-
-import random
+from matplotlib import pyplot as plt
+plt.rcParams["figure.figsize"] = (8,4)
 import numpy as np
 
 
@@ -20,7 +20,6 @@ class KLR:
         self.X_train = None
         self.y = None
         self.v = None
-
 
 
     def sigmoid(self, z):
@@ -122,31 +121,46 @@ class KLR:
     #     return y_hat 
 
     def predict(self, X) -> np.array:
-        X_ = self.pad(X);
+        X_ = self.pad(X)
         km = self.kernel(X_, self.X_train, **self.kernel_kwargs) # km stands for kernel matrix
         innerProd = km@self.v
         y_hat = 1 * (innerProd > 0)
 
         return y_hat 
 
-
-    
     def accuracy(self, X: np.array, y: np.array, w: np.array, ) -> float:
         pass
-
-
 
     def score(self, X, y) -> float:
         pass
 
-
-
-
     def pad(self, X):    
         return np.append(X, np.ones((X.shape[0],1)), 1)
 
-    def myprint(self):
-        print("it's working!")
+    def myprint(self, X, y, plot_function, value, width) -> None:
+        fig, axarr = plt.subplots(1,3)
+        axarr[0].scatter(X[:,0], X[:,1], c = y)
+        axarr[0].set(xlabel = "Feature 1", ylabel = "Feature 2", title = f"artificial data created by {plot_function}")
+
+        axarr[1].plot()
+        plot_decision_regions(X, y, clf = self, 
+                              feature_index=[0,1],
+                              filler_feature_values={2: value, 3: value},
+                              filler_feature_ranges={2: width, 3: width})
+        yourpredict = self.predict(X)
+        axarr[1].set(title = f"Accuracy = {(yourpredict == y).mean()}",
+                            xlabel = "Feature 0", 
+                            ylabel = "Feature 1")
+
+        axarr[2].plot()
+        plot_decision_regions(X, y, clf = self, 
+                              feature_index=[2,3],
+                              filler_feature_values={0: value, 1: value},
+                              filler_feature_ranges={0: width, 1: width})
+        yourpredict = self.predict(X)
+        axarr[2].set(title = f"Accuracy = {(yourpredict == y).mean()}",
+                            xlabel = "Feature 2", 
+                            ylabel = "Feature 3")
 
         
 
