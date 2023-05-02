@@ -138,9 +138,9 @@ class KLR:
         return np.append(X, np.ones((X.shape[0],1)), 1)
 
     def myprint(self, X, y, plot_function, value, width) -> None:
-        fig, axarr = plt.subplots(1,3)
+        fig, axarr = plt.subplots(1,2)
         axarr[0].scatter(X[:,0], X[:,1], c = y)
-        axarr[0].set(xlabel = "Feature 1", ylabel = "Feature 2", title = f"artificial data created by {plot_function}")
+        axarr[0].set(xlabel = "Feature 0", ylabel = "Feature 1", title = f"artificial data created by {plot_function}")
 
         axarr[1].plot()
         plot_decision_regions(X, y, clf = self, 
@@ -152,15 +152,8 @@ class KLR:
                             xlabel = "Feature 0", 
                             ylabel = "Feature 1")
 
-        axarr[2].plot()
-        plot_decision_regions(X, y, clf = self, 
-                              feature_index=[2,3],
-                              filler_feature_values={0: value, 1: value},
-                              filler_feature_ranges={0: width, 1: width})
-        yourpredict = self.predict(X)
-        axarr[2].set(title = f"Accuracy = {(yourpredict == y).mean()}",
-                            xlabel = "Feature 2", 
-                            ylabel = "Feature 3")
+        plt.tight_layout()
+
 
         
 
