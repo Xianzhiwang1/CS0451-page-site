@@ -258,10 +258,10 @@ z^{(t+1)} \leftarrow z^{(t)} - \alpha \nabla f(z^{(t)})
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>autoreload <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We start by importing the relavant libraries and creating some data points using the <code>make_blobs</code> function that we imported from <code>sklearn.datasets</code>. We would like to create some non-separable data, which means graphically in 2 dimension, we cannot draw a straight line to separate the data points of the two different classes (as indicated by the color). Notice that the horizontal axis is Feature 1, and the vertical axis is Feature 2.</p>
-<div class="cell" data-execution_count="2">
+<div class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_blobs</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">18</span>, <span class="dv">6</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">4</span>,<span class="dv">4</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
@@ -281,7 +281,7 @@ z^{(t+1)} \leftarrow z^{(t)} - \alpha \nabla f(z^{(t)})
 <p>Recall that we have feature matrix <code>X</code>, which is a <span class="math inline">\(n\times p\)</span> matrix with entries being real numbers. The number <span class="math inline">\(n\)</span> represents the number of distinct observations, and we have <span class="math inline">\(n\)</span> rows in <code>X</code>. <span class="math inline">\(p\)</span> is the number of features. Our data also have a <code>y</code>, which is called target vector and lives in <span class="math inline">\(\mathbb{R}^n\)</span>. The target vector gives a label, value, or outcome for each observation. In the <code>solutions_logistic.py</code>, we implemented the gradient descent using the following update step.</p>
 <p><span class="math display">\[ w^{(t+1)} \leftarrow w^{(t)}  - \alpha \cdot \nabla L(w^{(t)}), \]</span><br>
 where <span class="math inline">\(\nabla L(w)\)</span> is given by the following equation: <span class="math display">\[ \nabla L(w) = \frac{1}{n} \sum_{i=1}^{n} \nabla \ell(f_{w}(x_i), y_i)\]</span> Now let’s import our implementation and create plots.</p>
-<div class="cell" data-execution_count="3">
+<div class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> solutions_logistic <span class="im">import</span> LogisticRegression </span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>X_ <span class="op">=</span> LR.pad(X)</span>
@@ -294,7 +294,7 @@ where <span class="math inline">\(\nabla L(w)\)</span> is given by the following
 </div>
 </div>
 <p>After calling the function <code>fit</code>, we obtain the weight vector <code>w_</code>, but are they doing what they are supposed to do? How big is the loss for this perticular case? We could visualize this result by plotting the line that hopefully separates the data points in a intuitive way. See the picture on the <em>left</em>. Now we would like to find out about how the empirical loss evolves as the number of iteration goes up. Let’s plot this in the picture on the <em>right</em>.</p>
-<div class="cell" data-execution_count="4">
+<div class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># pick a random weight vector and calculate the loss</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> <span class="fl">.5</span> <span class="op">-</span> np.random.rand(p_features)</span>
@@ -305,19 +305,20 @@ where <span class="math inline">\(\nabla L(w)\)</span> is given by the following
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co"># p = plt.plot(f1, (LR.w_[2] - f1*LR.w_[0])/LR.w_[1], color = "black")</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co"># title = plt.gca().set_title(f"Loss = {LR.last_loss}")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>], c <span class="op">=</span> y)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>, title <span class="op">=</span> <span class="ss">f"Loss = </span><span class="sc">{</span>LR<span class="sc">.</span>last_loss<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>f1 <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">101</span>)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> axarr[<span class="dv">0</span>].plot(f1, (LR.w_[<span class="dv">2</span>] <span class="op">-</span> f1<span class="op">*</span>LR.w_[<span class="dv">0</span>])<span class="op">/</span>LR.w_[<span class="dv">1</span>], color <span class="op">=</span> <span class="st">"black"</span>)</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].plot(LR.loss_history)</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Iteration number"</span>, ylabel <span class="op">=</span> <span class="st">"Empirical Risk"</span>)</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">18</span>,<span class="dv">6</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>], c <span class="op">=</span> y)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">0</span>].<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>, title <span class="op">=</span> <span class="ss">f"Loss = </span><span class="sc">{</span>LR<span class="sc">.</span>last_loss<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>f1 <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">101</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>p <span class="op">=</span> axarr[<span class="dv">0</span>].plot(f1, (LR.w_[<span class="dv">2</span>] <span class="op">-</span> f1<span class="op">*</span>LR.w_[<span class="dv">0</span>])<span class="op">/</span>LR.w_[<span class="dv">1</span>], color <span class="op">=</span> <span class="st">"black"</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].plot(LR.loss_history)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>axarr[<span class="dv">1</span>].<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Iteration number"</span>, ylabel <span class="op">=</span> <span class="st">"Empirical Risk"</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-6-output-1.png" class="img-fluid"></p>
 </div>
