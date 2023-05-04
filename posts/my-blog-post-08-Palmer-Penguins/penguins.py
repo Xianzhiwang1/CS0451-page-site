@@ -1,4 +1,5 @@
 from sklearn.preprocessing import LabelEncoder
+from sklearn.linear_model import LogisticRegression
 from matplotlib.patches import Patch
 from matplotlib import pyplot as plt
 plt.rcParams["figure.figsize"] = (4,4)
@@ -13,6 +14,7 @@ le = LabelEncoder()
 class PG():
     def __init__(self, df_col):
         self.le = le.fit(df_col)
+        self.feature_score_pair = dict() 
 
     def prepare_data(self, df):
         df = df.drop(["studyName", "Sample Number", "Individual ID", "Date Egg", "Comments", "Region"], axis = 1)
@@ -23,15 +25,19 @@ class PG():
         df = pd.get_dummies(df)
         return df, y
 
-    def select_combin(self, df, all_qual_cols, all_quant_cols):
+    def select_combin_Logistic(self, df, y, all_qual_cols, all_quant_cols):
         for qual in all_qual_cols: 
             qual_cols = [col for col in df.columns if qual in col ]
             for pair in combinations(all_quant_cols, 2):
                 cols = qual_cols + list(pair) 
-                print(cols)
                 # you could train models and score them here, keeping the list of 
                 # columns for the model that has the best score. 
-                # 
+                LR = LogisticRegression()
+                LR.fit(df[cols], y)
+                score = LR.score(df[cols],y)
+                self.feature_score_pair[tuple(cols)] = score
+
+
 
 
     def plot_regions(self, model, X, y):
