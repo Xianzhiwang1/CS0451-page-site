@@ -29,10 +29,6 @@ class spectral:
         self.L = np.linalg.inv(self.D) @ (self.D-A)
         # print(self.L)
         evalue, evector = np.linalg.eig(self.L)
-        # print("evalue")
-        # print(evalue)
-        # print("evector")
-        # print(evector)
         k = self.L.shape[1] 
         idx = evalue.argsort()[:k][::-1] 
         evalue = evalue[idx]
@@ -73,5 +69,27 @@ class spectral:
 
 
 
+'''
+Recorded here for testing
+'''
+# L = np.diag([4,5,22,2,3])
+# # print(L)
+# evalue, evector = np.linalg.eig(L)
+# print("evalue")
+# print(evalue)
+# print("evector")
+# print(evector)
+# k = L.shape[1] 
+# idx = evalue.argsort()[:k][::-1] 
+# evalue = evalue[idx]
+# evector = evector[:, idx]
 
+# print("evalue after change")
+# print(evalue)
+# print("evector after change")
+# print(evector)
+
+# index = evector.shape[1]
+# print("col")
+# print(evector[:,index-2])
 
