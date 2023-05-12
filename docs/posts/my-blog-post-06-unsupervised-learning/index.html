@@ -238,7 +238,7 @@ background-size: cover;
 <p>Our main work horse for Image Compression is Singular Value Decomposition, but before we introduce that, let’s recall a few definitions and facts from linear algebra. First, let <span class="math inline">\(A\)</span> be a <span class="math inline">\(m\times n\)</span> matrix. Let’s consider the matrix <span class="math inline">\(A^TA\)</span>, which is <span class="math inline">\(n\times n\)</span> and symmetric, because <span class="math inline">\((A^TA)^T\)</span> is still <span class="math inline">\(A^TA\)</span>. Now, we recall that if <span class="math inline">\(\lambda\)</span> is an eigenvalue of <span class="math inline">\(A^TA\)</span>, then <span class="math inline">\(\lambda \geq 0\)</span>. This is a fact from linear algebra, and let’s just take it as given here. Now, let <span class="math inline">\(\lambda_1, \lambda_2, \cdots, lambda_n\)</span> denote the eigenvalues of <span class="math inline">\(A^TA\)</span>, allowing repetitions. We could assume we have ordered them so that <span class="math inline">\(\lambda_1 \geq \lambda_2 \geq \lambda_3, \cdots \geq 0\)</span>. Now let <span class="math inline">\(\sigma_i = \sqrt{\lambda_i},\)</span> and you guessed it, the numbers <span class="math inline">\(\sigma_{1} \geq \sigma_{2} \geq \cdots \geq \sigma_{n}\)</span> are the singular values of <span class="math inline">\(A\)</span>.</p>
 <p>Let <span class="math inline">\(A\)</span> be an <span class="math inline">\(m\times n\)</span> matrix with singular values <span class="math inline">\(\sigma_{1} \geq \sigma_{2} \geq \cdots \geq \sigma_{n} \geq 0\)</span>, Let <span class="math inline">\(r\)</span> denote the number of nonzero singular values of <span class="math inline">\(A\)</span>, or equivalently the rank of <span class="math inline">\(A\)</span>. Then, the singular value decomposition of <span class="math inline">\(A\)</span> is a factorization <span class="math display">\[
 A = U \Sigma V^T
-\]</span> where <span class="math inline">\(U\)</span> is a <span class="math inline">\(m \times m\)</span> orthogonal matrix, <span class="math inline">\(V\)</span> is a <span class="math inline">\(n \times n\)</span> orthogonal matrix, and <span class="math inline">\(\Sigma\)</span> is an <span class="math inline">\(m \times n\)</span> matrix whose <span class="math inline">\(i\)</span> th diagonal entry equals the <span class="math inline">\(i\)</span>th singular value <span class="math inline">\(\sigma_{i}\)</span> for <span class="math inline">\(i = 1,\cdots, r\)</span>. All other entries of <span class="math inline">\(\Sigma\)</span> are zero.</p>
+\]</span> where <span class="math inline">\(U\)</span> is a <span class="math inline">\(m \times m\)</span> orthogonal matrix, <span class="math inline">\(V\)</span> is a <span class="math inline">\(n \times n\)</span> orthogonal matrix, and <span class="math inline">\(\Sigma\)</span> is an <span class="math inline">\(m \times n\)</span> matrix whose <span class="math inline">\(i\)</span> th diagonal entry equals the <span class="math inline">\(i\)</span> th singular value <span class="math inline">\(\sigma_{i}\)</span> for <span class="math inline">\(i = 1,\cdots, r\)</span>. All other entries of <span class="math inline">\(\Sigma\)</span> are zero.</p>
 <p>We won’t go into detail about how the decomposition is actually computed, since we will focus on the implementation and application to compressing images, which roughly speaking, is about storing the image as a fraction of the original size, while still maintain a reasonable level of image resolution or sharpness so that we did not sacrafice too much image quality to store it with a reduced size.</p>
 <div class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
@@ -293,7 +293,50 @@ mode: RGB</code></pre>
 <p><img src="index_files/figure-html/cell-6-output-2.png" class="img-fluid"></p>
 </div>
 </div>
-<p>Now, our image is in greyscale, and it is represented in the python notebook as numpy array. Let’s check the dimension of this array once more just to be sure.</p>
+<p>Actually, before we lauch into the implementation of SVD, let us do an example to calculate the SVD of a 2 by 2 matrix by hand, so we know what’s going on exactly.</p>
+<p>Let <span class="math inline">\(A\)</span> be the matrix <span class="math display">\[
+A =
+\begin{bmatrix}
+3 &amp; 0\\
+4 &amp; 5\\
+\end{bmatrix}
+\]</span> Let’s find <span class="math inline">\(U\)</span>. We have<br>
+<span class="math display">\[
+A^T =
+\begin{bmatrix}
+3 &amp; 4\\
+0 &amp; 5\\
+\end{bmatrix}
+\]</span> Thus <span class="math display">\[
+A A^T =
+\begin{bmatrix}
+9 &amp; 12\\
+12 &amp; 41\\
+\end{bmatrix}
+\]</span> Now we find the eigenvalue and eigenvectors of <span class="math inline">\(AA^T\)</span> by computing <span class="math display">\[
+det(AA^T -I \lambda) =0
+\]</span> We get the characteristic function <span class="math inline">\(\lambda^2 - 50 \lambda + 225 = 0\)</span>. We could factor it into linear factors, and we get <span class="math display">\[
+(\lambda - 45)(\lambda - 5) = 0
+\]</span> so <span class="math inline">\(\lambda_1 = 45,\)</span> and <span class="math inline">\(\lambda_2 = 5\)</span>. For eigenvalue <span class="math inline">\(45\)</span>, the eigenvector is <span class="math inline">\((1,3)^T\)</span>, and for eigenvalue <span class="math inline">\(5\)</span>, the eigenvector is <span class="math inline">\((3,-1)^T\)</span>. Hence, we get <span class="math display">\[
+U = \frac{1}{\sqrt{10}} \cdot
+\begin{bmatrix}
+1 &amp; 3\\
+3 &amp; -1\\
+\end{bmatrix}
+\]</span> Now, since eigenvalues of <span class="math inline">\(AA^T\)</span> equals the eigenvalues of <span class="math inline">\(A^TA\)</span>, we could get our singular values. <span class="math inline">\(\sigma_1 = \sqrt{\lambda_1} = \sqrt{45}\)</span>, and <span class="math inline">\(\sigma_2 = \sqrt{\lambda_2} = \sqrt{5}\)</span>. Hence, we get <span class="math display">\[
+\Sigma =
+\begin{bmatrix}
+\sqrt{45} &amp; 0\\
+0 &amp; \sqrt{5}\\
+\end{bmatrix}
+\]</span> Note that the order of the singular value need to match the eigenvectors in <span class="math inline">\(U\)</span> we got earlier. Now, we need to get <span class="math inline">\(V\)</span>. We obtain this by calculating the eigenvalue and eigenvectors of <span class="math inline">\(A^TA\)</span>, and since it’s similar to before, let’s just write down the answer here. <span class="math display">\[
+V= \frac{1}{\sqrt{2}}
+\begin{bmatrix}
+1&amp;1\\
+1&amp;-1\\
+\end{bmatrix}
+\]</span> Now, after seeing this example, we feel we have a better understanding of SVD decomposition. Hence, let us return to our cat image.</p>
+<p>We see that we have successfully turned our cat image to greyscale, and it is represented in the python notebook as numpy array. Let’s check the dimension of this array once more just to be sure.</p>
 <div class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(grey_img.shape[<span class="dv">0</span>])</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(grey_img.shape[<span class="dv">1</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -331,83 +374,108 @@ mode: RGB</code></pre>
 </section>
 <section id="part-ii-spectral-community-detection" class="level1">
 <h1>Part II: Spectral Community Detection</h1>
-<p>We need to return a vector of binary labels to split the graph.</p>
+<p>We would like to use Laplacian spectral clustering algorithm to find clusters in data sets represented as a graph. First, what do we mean by graphs? Mathematically, graphs is a tuple <span class="math inline">\((V,E)\)</span> where <span class="math inline">\(V\)</span> is a set of vertices, or nodes, and elements in <span class="math inline">\(E\)</span> are subsets of <span class="math inline">\(V\)</span> that represent edges. Hence, the element in set <span class="math inline">\(E\)</span> are themselves sets of elements of <span class="math inline">\(V\)</span>! That’s a mouthful, but we are not going to deal with these, let us just plot a graph to see for ourselves. Also, notice that in <code>networkx</code> package, we could use different layouts for plotting our graphs.</p>
+<div class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">3</span>))</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>G <span class="op">=</span> nx.petersen_graph()</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>subax1 <span class="op">=</span> plt.subplot(<span class="dv">131</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>nx.draw(G) <span class="co"># spring_layout</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>subax2 <span class="op">=</span> plt.subplot(<span class="dv">132</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>nx.draw(G, pos<span class="op">=</span>nx.circular_layout(G), node_color<span class="op">=</span><span class="st">"r"</span>, edge_color<span class="op">=</span><span class="st">"b"</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>subax3 <span class="op">=</span> plt.subplot(<span class="dv">133</span>)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>nx.draw_spectral(G)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-11-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now we know what a graph looks like, we would like to talk a little about clustering data using Laplacian Spectral clustering. Basically, clustering is a form of <em>unsupervised learning</em> where our goal is to group data points into “related” groups. For example, in the below plot, we could see clearly that there are two “blobs” of data, each blob is a cluster. The clustering task is identify clusters that <em>fits</em> the data, even when we do not have any labels <code>y</code>. Sometimes, we just need to eyeball the data and say, well, it seems we should classify the data into these two clusters!</p>
+<div class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_blobs</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">3</span>,<span class="dv">3</span>))</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>X,y <span class="op">=</span> make_blobs(n_samples<span class="op">=</span><span class="dv">100</span>, n_features<span class="op">=</span><span class="dv">2</span>, centers<span class="op">=</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>a<span class="op">=</span>ax.scatter(X[:,<span class="dv">0</span>], X[:,<span class="dv">1</span>])</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>a<span class="op">=</span>ax.<span class="bu">set</span>(xlabel<span class="op">=</span><span class="st">"feature 1"</span>, ylabel<span class="op">=</span><span class="st">"feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-12-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Now, laplacian spectral clustering is a method that use matrix eigenvectors to cluster data. It’s most effective for binary clustering, and it works for nonlinear clustering of data.</p>
+<p>Here’s a road map: first, we need to compute the <span class="math inline">\(k\)</span>-nearest-neighbors graph using <code>NearestNeighbors</code> from <code>sklearn.neighbors</code>. Then we define a clustering to be good if it does not “cut” too many edges. An edge is “cut” if it has two nodes in different clusters. However, one can always minimize cut by assigning all the vertices of the graph to the same label! Hence, we label the whole graph as a single cluster, which is not terribly interesting. Thus, we need to normalize the cut. Thus, we need concepts such as the <em>volume of a cluster</em>, and the <em>normalized cut objective function</em>.</p>
 </section>
 <section id="implementing-laplacian-spectral-clustering" class="level1">
 <h1>Implementing Laplacian Spectral Clustering</h1>
-<div class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_blobs, make_circles</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">12345</span>)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> make_blobs(n_samples<span class="op">=</span><span class="dv">100</span>, n_features<span class="op">=</span><span class="dv">2</span>, </span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>                                centers<span class="op">=</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>])</span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<p><img src="index_files/figure-html/cell-13-output-1.png" class="img-fluid"></p>
+<div class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_blobs, make_circles</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-<div class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">500</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> make_circles(n_samples<span class="op">=</span>n, shuffle<span class="op">=</span><span class="va">True</span>, noise<span class="op">=</span><span class="fl">0.07</span>, random_state<span class="op">=</span><span class="va">None</span>, factor <span class="op">=</span> <span class="fl">0.5</span>)</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>])</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We are interested in using Laplacian spectral clustering to cluster the two circles into their own clusters.</p>
+<div class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">500</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> make_circles(n_samples<span class="op">=</span>n, shuffle<span class="op">=</span><span class="va">True</span>, noise<span class="op">=</span><span class="fl">0.07</span>, random_state<span class="op">=</span><span class="va">None</span>, factor <span class="op">=</span> <span class="fl">0.5</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>])</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-14-output-1.png" class="img-fluid"></p>
 </div>
 </div>
+<p>Now, let us see <code>NearestNeighbors</code> at work in the following cell.</p>
 <div class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> NearestNeighbors</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> <span class="dv">10</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>nbrs <span class="op">=</span> NearestNeighbors(n_neighbors<span class="op">=</span>k).fit(X)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> nbrs.kneighbors_graph().toarray()</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># symmetrize the matrix</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> A <span class="op">+</span> A.T</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>A[A <span class="op">&gt;</span> <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> NearestNeighbors</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>nbrs <span class="op">=</span> NearestNeighbors(n_neighbors<span class="op">=</span>k).fit(X)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> nbrs.kneighbors_graph().toarray()</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># symmetrize the matrix</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> A <span class="op">+</span> A.T</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>A[A <span class="op">&gt;</span> <span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Let us import the <code>spectral</code> python class that we implemented. We could use the <code>plot_graph</code> function we implemented in there to plot the nearest neighbor graph for us.</p>
 <div class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden_spectral <span class="im">import</span> spectral </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>spec  <span class="op">=</span> spectral()</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">4</span>,<span class="dv">4</span>)</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>spec.plot_graph(X, A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden_spectral <span class="im">import</span> spectral </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>spec  <span class="op">=</span> spectral()</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">"figure.figsize"</span>] <span class="op">=</span> (<span class="dv">4</span>,<span class="dv">4</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>spec.plot_graph(X, A)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-16-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 <div class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fig, axarr = plt.subplots(1, 2, figsize = (8, 4))</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>y_bad <span class="op">=</span> np.random.randint(<span class="dv">0</span>, <span class="dv">2</span>, n)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_graph(X, A, z = y, ax = axarr[0])</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_graph(X, A, z = y_bad, ax = axarr[1])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fig, axarr = plt.subplots(1, 2, figsize = (8, 4))</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>y_bad <span class="op">=</span> np.random.randint(<span class="dv">0</span>, <span class="dv">2</span>, n)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_graph(X, A, z = y, ax = axarr[0])</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="co"># plot_graph(X, A, z = y_bad, ax = axarr[1])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Here’s now volume of a cluster <span class="math inline">\(j\)</span> in matrix <span class="math inline">\(A\)</span> with clustering vector <span class="math inline">\(z\)</span> is defined: <span class="math display">\[
+vol_j (A,z) = \sum_{i=1}^{n} \sum_{k=1}^{n} \mathbb{1}[z_i = j]a_{ik}
+\]</span> We could think of <span class="math inline">\(vol_j(A,z)\)</span> as representing the number of edges that have one node in cluster <span class="math inline">\(j\)</span>. Now, the normalized cut objective function is <span class="math display">\[
+f(z,A) = cut(A,z) (1/vol_0(A,z) + 1/vol_1(A,z))
+\]</span> It turns out that we are not going to use these equations directory in our actual implementation, and instead, we’ll use approximated versions of these functions.</p>
 <div class="cell" data-execution_count="15">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> NearestNeighbors</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> pairwise_distances</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cut(A, z):</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> pairwise_distances(z.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (A<span class="op">*</span>D).<span class="bu">sum</span>()</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"good labels cut = </span><span class="sc">{</span>cut(A, z <span class="op">=</span> y)<span class="sc">}</span><span class="ss">"</span>) </span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"bad labels cut = </span><span class="sc">{</span>cut(A, z <span class="op">=</span> y_bad)<span class="sc">}</span><span class="ss">"</span>) </span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cut(A, z):</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> pairwise_distances(z.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (A<span class="op">*</span>D).<span class="bu">sum</span>()</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"good labels cut = </span><span class="sc">{</span>cut(A, z <span class="op">=</span> y)<span class="sc">}</span><span class="ss">"</span>) </span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"bad labels cut = </span><span class="sc">{</span>cut(A, z <span class="op">=</span> y_bad)<span class="sc">}</span><span class="ss">"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> NearestNeighbors</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> pairwise_distances</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cut(A, z):</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> pairwise_distances(z.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (A<span class="op">*</span>D).<span class="bu">sum</span>()</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"good labels cut = </span><span class="sc">{</span>cut(A, z <span class="op">=</span> y)<span class="sc">}</span><span class="ss">"</span>) </span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"bad labels cut = </span><span class="sc">{</span>cut(A, z <span class="op">=</span> y_bad)<span class="sc">}</span><span class="ss">"</span>) </span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> cut(A, z):</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    D <span class="op">=</span> pairwise_distances(z.reshape(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (A<span class="op">*</span>D).<span class="bu">sum</span>()</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"good labels cut = </span><span class="sc">{</span>cut(A, z <span class="op">=</span> y)<span class="sc">}</span><span class="ss">"</span>) </span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"bad labels cut = </span><span class="sc">{</span>cut(A, z <span class="op">=</span> y_bad)<span class="sc">}</span><span class="ss">"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>good labels cut = 22.0
 bad labels cut = 3000.0
@@ -416,129 +484,142 @@ bad labels cut = 3000.0</code></pre>
 </div>
 </div>
 </section>
-<section id="use-a-theorem-from-linear-algebra" class="level1">
-<h1>Use a theorem from linear algebra</h1>
-<p><span class="math inline">\(z\)</span> should be the eigenvector with the second smallest eigenvalue of the matrix <span class="math display">\[L = D^{-1}\left[ D-A \right]. \]</span> This matrix <span class="math inline">\(L\)</span> is called the normalized Laplacian.</p>
+<section id="use-theorems-from-linear-algebra" class="level1">
+<h1>Use theorems from linear algebra</h1>
+<p>Hence, let <span class="math inline">\(z \in \{0,1\}^n\)</span> denote the binary vector that we try to predict, then we form a <span class="math inline">\(\~{z}\)</span> such that <span class="math display">\[
+\~{z_i} = 1/vol_0(A,z) \ \text{when} \ z_i = 0
+\]</span> and <span class="math display">\[
+\~{z_i} = 1/vol_1(A,z) \ \text{when} \ z_i = 1
+\]</span> Now, our objective function becomes <span class="math display">\[
+f(z) = \frac{\~{z}^T (D-A)\~{z}} {\~{z}^T D \~{z}}
+\]</span> where <span class="math inline">\(D\)</span> is a diagonal matrix with <span class="math inline">\(\sum_{i=1}^n a_{ij}\)</span> on the j-th position on the diagional. We are omitting many mathematical steps here, but that is okay, since we do not need to know all these details when we implement this in code. What we do need is the result from doing all these computations: <span class="math inline">\(z\)</span> turns out to be the eigenvector with the second smallest eigenvalue of the matrix <span class="math display">\[L = D^{-1}\left[ D-A \right]. \]</span> This matrix <span class="math inline">\(L\)</span> is called the normalized Laplacian. Hence, this equation about <span class="math inline">\(L\)</span> is all we need to turn into code for our implementation to work.</p>
 <div class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden_spectral <span class="im">import</span> spectral </span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>spec <span class="op">=</span> spectral()</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>z_ <span class="op">=</span> spec.second_laplacian_eigenvector(A<span class="op">=</span>A)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>spec.plot_graph(X, A, z<span class="op">=</span>z_, ax <span class="op">=</span> ax, show_edge_cuts <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> hidden_spectral <span class="im">import</span> spectral </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>spec <span class="op">=</span> spectral()</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>z_ <span class="op">=</span> spec.second_laplacian_eigenvector(A<span class="op">=</span>A)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>spec.plot_graph(X, A, z<span class="op">=</span>z_, ax <span class="op">=</span> ax, show_edge_cuts <span class="op">=</span> <span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-19-output-1.png" class="img-fluid"></p>
 </div>
 </div>
+<p>We see that our plots looks good! Our code distinguishes the inner ring from the outer ring, successfully classifying them into different clusters! Below, we also highlight the cut edges.</p>
 <div class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> z_ <span class="op">&gt;</span> <span class="dv">0</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>spec.plot_graph(X, A, z, show_edge_cuts <span class="op">=</span> <span class="va">True</span>, ax <span class="op">=</span> ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>z <span class="op">=</span> z_ <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>spec.plot_graph(X, A, z, show_edge_cuts <span class="op">=</span> <span class="va">True</span>, ax <span class="op">=</span> ax)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-20-output-1.png" class="img-fluid"></p>
 </div>
 </div>
+<p>Let us try our implementation on a different data set.</p>
 <div class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_moons</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>H, z <span class="op">=</span> make_moons(n_samples<span class="op">=</span><span class="dv">100</span>, random_state<span class="op">=</span><span class="dv">1</span>, noise <span class="op">=</span> <span class="fl">.1</span>)</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.scatter(H[:, <span class="dv">0</span>], H[:, <span class="dv">1</span>])</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> make_moons</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>H, z <span class="op">=</span> make_moons(n_samples<span class="op">=</span><span class="dv">100</span>, random_state<span class="op">=</span><span class="dv">1</span>, noise <span class="op">=</span> <span class="fl">.1</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.scatter(H[:, <span class="dv">0</span>], H[:, <span class="dv">1</span>])</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-21-output-1.png" class="img-fluid"></p>
 </div>
 </div>
+<p>Again, our implementation worked! Now, we want to experiment a little with how big a value we should pick for <code>n_neighbors</code>, which is the number of neighbors needed to form the nearest-neighbors graph. This is a parameter that requires some fine-tuning. Hence, let us try several values and see how each of them performs.</p>
 <div class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>z_hat <span class="op">=</span> spec.spectral_clustering(H, k<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.scatter(H[:, <span class="dv">0</span>], H[:, <span class="dv">1</span>], c <span class="op">=</span> z_hat, cmap <span class="op">=</span> plt.cm.cividis)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>z_hat <span class="op">=</span> spec.spectral_clustering(H, k<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.scatter(H[:, <span class="dv">0</span>], H[:, <span class="dv">1</span>], c <span class="op">=</span> z_hat, cmap <span class="op">=</span> plt.cm.cividis)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-22-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 <div class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axarr.ravel():</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> spec.spectral_clustering(X, k <span class="op">=</span> i)</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> ax.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>], c <span class="op">=</span> z, cmap <span class="op">=</span> plt.cm.cividis)</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>, title <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss"> neighbors"</span>)</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    i <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axarr.ravel():</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> spec.spectral_clustering(X, k <span class="op">=</span> i)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> ax.scatter(X[:, <span class="dv">0</span>], X[:, <span class="dv">1</span>], c <span class="op">=</span> z, cmap <span class="op">=</span> plt.cm.cividis)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>, title <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss"> neighbors"</span>)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-23-output-1.png" class="img-fluid"></p>
 </div>
 </div>
+<p>We see that for the two concentric circles, <span class="math inline">\(6\)</span> neighbors seems to be the sweet spot.</p>
 <div class="cell" data-execution_count="82">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axarr.ravel():</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> spec.spectral_clustering(H, k <span class="op">=</span> i)</span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> ax.scatter(H[:, <span class="dv">0</span>], H[:, <span class="dv">1</span>], c <span class="op">=</span> z, cmap <span class="op">=</span> plt.cm.cividis)</span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>, title <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss"> neighbors"</span>)</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    i <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>fig, axarr <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>i <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ax <span class="kw">in</span> axarr.ravel():</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> spec.spectral_clustering(H, k <span class="op">=</span> i)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> ax.scatter(H[:, <span class="dv">0</span>], H[:, <span class="dv">1</span>], c <span class="op">=</span> z, cmap <span class="op">=</span> plt.cm.cividis)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    a <span class="op">=</span> ax.<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Feature 1"</span>, ylabel <span class="op">=</span> <span class="st">"Feature 2"</span>, title <span class="op">=</span> <span class="ss">f"</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss"> neighbors"</span>)</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    i <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-24-output-1.png" class="img-fluid"></p>
 </div>
 </div>
-<p><span class="math display">\[\mathcal{L}(a, b) = \sum_{i = 1}^n (ax_i + b - y_i)^2\;.\]</span></p>
+<p>For the two “half-moon” shapes, <span class="math inline">\(6\)</span> neighbors again seems to be the optimal value to use.</p>
+<p>Now, since we have a working Laplacian spectral clustering implementation, let us try it on a classic graph for community detection.</p>
 </section>
 <section id="evaluate-the-laplacian-spectral-clustering-algorithm-on-the-karate-club-graph" class="level1">
 <h1>Evaluate the Laplacian spectral clustering algorithm on the “Karate Club Graph”</h1>
-<p>Now it’s time to test whether our implementation of spectral clustering is doing a good job at community detection or not! Let us import the <code>networkx</code> library and plot the <code>Karate Club Graph</code>, where each node (dot/vertex) represents a member of a karate club. Edges in this graph represents social ties between two club members. We could think of it this way: if there is an edge between two members, we assume those two members had a good time together in the karate club.</p>
+<p>Now it’s time to test whether our implementation of spectral clustering is doing a good job at community detection or not! Let us import the <code>networkx</code> library and plot the <code>Karate Club Graph</code>, where each node (dot/vertex) represents a member of a karate club. Edges in this graph represents social ties between two club members. We could think of it this way: if there is an edge between two members, we assume those two members had a good time together in the karate club. Let’s plot the graph and see how it looks like.</p>
+<p>We see that there seems to be two “clusters” in the graph, one around node <span class="math inline">\(0\)</span>, which is the instructor of the club, “Mr.&nbsp;Hi”, and another around node <span class="math inline">\(33\)</span>, which is the club president. Assume that this graph is going to split into two graphs, one around node <span class="math inline">\(0\)</span> and one around node <span class="math inline">\(33\)</span>, representing the split up of the actual club into two separate clubs. Could our implementation predict the division of the graph based solely on the social ties, which are edges, that we see here in the graph? Let’s find out!</p>
 <div class="cell" data-execution_count="83">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>G <span class="op">=</span> nx.karate_club_graph()</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>layout <span class="op">=</span> nx.layout.fruchterman_reingold_layout(G)</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>nx.draw(G, layout, with_labels<span class="op">=</span><span class="va">True</span>, node_color <span class="op">=</span> <span class="st">"steelblue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> networkx <span class="im">as</span> nx</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>G <span class="op">=</span> nx.karate_club_graph()</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>layout <span class="op">=</span> nx.layout.fruchterman_reingold_layout(G)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>nx.draw(G, layout, with_labels<span class="op">=</span><span class="va">True</span>, node_color <span class="op">=</span> <span class="st">"steelblue"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-25-output-1.png" class="img-fluid"></p>
 </div>
 </div>
 <div class="cell" data-execution_count="84">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>clubs <span class="op">=</span> nx.get_node_attributes(G, <span class="st">"club"</span>)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>G_np <span class="op">=</span> nx.to_numpy_array(G)</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>z_hat <span class="op">=</span> spec.spectral_clustering(G_np, k<span class="op">=</span><span class="dv">6</span>)</span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(z_hat.tolist()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>clubs <span class="op">=</span> nx.get_node_attributes(G, <span class="st">"club"</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>G_np <span class="op">=</span> nx.to_numpy_array(G)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>z_hat <span class="op">=</span> spec.spectral_clustering(G_np, k<span class="op">=</span><span class="dv">6</span>)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(z_hat.tolist()))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>&lt;class 'list'&gt;</code></pre>
 </div>
 </div>
 <div class="cell" data-execution_count="85">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(clubs)</span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>keys <span class="op">=</span> <span class="bu">range</span>(<span class="dv">34</span>)</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>z_hat_list <span class="op">=</span> z_hat.tolist()</span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>mydict <span class="op">=</span> <span class="bu">dict</span>(<span class="bu">zip</span>(keys, z_hat_list))</span>
-<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mydict)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(clubs)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>keys <span class="op">=</span> <span class="bu">range</span>(<span class="dv">34</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>z_hat_list <span class="op">=</span> z_hat.tolist()</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>mydict <span class="op">=</span> <span class="bu">dict</span>(<span class="bu">zip</span>(keys, z_hat_list))</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mydict)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>{0: 'Mr. Hi', 1: 'Mr. Hi', 2: 'Mr. Hi', 3: 'Mr. Hi', 4: 'Mr. Hi', 5: 'Mr. Hi', 6: 'Mr. Hi', 7: 'Mr. Hi', 8: 'Mr. Hi', 9: 'Officer', 10: 'Mr. Hi', 11: 'Mr. Hi', 12: 'Mr. Hi', 13: 'Mr. Hi', 14: 'Officer', 15: 'Officer', 16: 'Mr. Hi', 17: 'Mr. Hi', 18: 'Officer', 19: 'Mr. Hi', 20: 'Officer', 21: 'Mr. Hi', 22: 'Officer', 23: 'Officer', 24: 'Officer', 25: 'Officer', 26: 'Officer', 27: 'Officer', 28: 'Officer', 29: 'Officer', 30: 'Officer', 31: 'Officer', 32: 'Officer', 33: 'Officer'}
 {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 1, 9: 1, 10: 0, 11: 0, 12: 0, 13: 0, 14: 1, 15: 1, 16: 0, 17: 0, 18: 1, 19: 0, 20: 1, 21: 0, 22: 1, 23: 1, 24: 1, 25: 1, 26: 1, 27: 1, 28: 1, 29: 1, 30: 1, 31: 1, 32: 1, 33: 1}</code></pre>
 </div>
 </div>
+<p>Below, we see that our implementation did a good job splitting the graph into two “clusters”, or “communities”, that more or less fits our imagination if we eyeball the graph.</p>
 <div class="cell" data-execution_count="86">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>nx.draw(G, layout,</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>        with_labels<span class="op">=</span><span class="va">True</span>, </span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># node_color = ["orange" if clubs[i] == "Officer" else "steelblue" for i in G.nodes()],</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>        node_color <span class="op">=</span> [<span class="st">"steelblue"</span> <span class="cf">if</span> mydict[i] <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="st">"orange"</span> <span class="cf">for</span> i <span class="kw">in</span> mydict.keys()],</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>        edgecolors <span class="op">=</span> <span class="st">"black"</span> <span class="co"># confusingly, this is the color of node borders, not of edges</span></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>        ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>nx.draw(G, layout,</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>        with_labels<span class="op">=</span><span class="va">True</span>, </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>        node_color <span class="op">=</span> [<span class="st">"steelblue"</span> <span class="cf">if</span> mydict[i] <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="st">"orange"</span> <span class="cf">for</span> i <span class="kw">in</span> mydict.keys()],</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>        edgecolors <span class="op">=</span> <span class="st">"black"</span> <span class="co"># confusingly, this is the color of node borders, not of edges</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-28-output-1.png" class="img-fluid"></p>
 </div>
 </div>
+<p>Now, we compare the performance between our implementation (above) and the actual splitting of the graph (below).</p>
 <div class="cell" data-execution_count="87">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>nx.draw(G, layout,</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>        with_labels<span class="op">=</span><span class="va">True</span>, </span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>        node_color <span class="op">=</span> [<span class="st">"orange"</span> <span class="cf">if</span> clubs[i] <span class="op">==</span> <span class="st">"Officer"</span> <span class="cf">else</span> <span class="st">"steelblue"</span> <span class="cf">for</span> i <span class="kw">in</span> G.nodes()],</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>        edgecolors <span class="op">=</span> <span class="st">"black"</span> <span class="co"># confusingly, this is the color of node borders, not of edges</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>        ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>nx.draw(G, layout,</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>        with_labels<span class="op">=</span><span class="va">True</span>, </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>        node_color <span class="op">=</span> [<span class="st">"orange"</span> <span class="cf">if</span> clubs[i] <span class="op">==</span> <span class="st">"Officer"</span> <span class="cf">else</span> <span class="st">"steelblue"</span> <span class="cf">for</span> i <span class="kw">in</span> G.nodes()],</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>        edgecolors <span class="op">=</span> <span class="st">"black"</span> <span class="co"># confusingly, this is the color of node borders, not of edges</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>        ) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <p><img src="index_files/figure-html/cell-29-output-1.png" class="img-fluid"></p>
 </div>
